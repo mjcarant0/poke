@@ -26,6 +26,7 @@ export function QACommentThread({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const [commentUpvotes, setCommentUpvotes] = useState<Record<string, number>>({});
+  const [commentHasUpvoted, setCommentHasUpvoted] = useState<Record<string, boolean>>({});
   const [commentUpvoteMsg, setCommentUpvoteMsg] = useState<{ id: string; text: string } | null>(null);
 
   const handleUpvoteCommentItem = async (commentId: string) => {
@@ -34,7 +35,8 @@ export function QACommentThread({
       const data = await res.json();
       if (res.ok) {
         setCommentUpvotes((prev) => ({ ...prev, [commentId]: data.upvotes }));
-        setCommentUpvoteMsg({ id: commentId, text: 'Upvoted!' });
+        setCommentHasUpvoted((prev) => ({ ...prev, [commentId]: data.hasUpvoted }));
+        setCommentUpvoteMsg({ id: commentId, text: data.hasUpvoted ? 'Upvoted!' : 'Upvote removed' });
       } else {
         setCommentUpvoteMsg({ id: commentId, text: data.error || 'Cannot upvote.' });
       }
@@ -266,15 +268,26 @@ export function QACommentThread({
                   </span>
                 )}
 
-                <button
-                  type="button"
-                  onClick={() => handleUpvoteCommentItem(comment.id)}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white text-[11px] font-extrabold transition-colors border border-gray-200 dark:border-white/10"
-                  title="Upvote QA report (Account required, cannot upvote own comment)"
-                >
-                  <ThumbsUp className="w-3 h-3" />
-                  <span>{commentUpvotes[comment.id] !== undefined ? commentUpvotes[comment.id] : (comment.upvotes || 0)}</span>
-                </button>
+                {(() => {
+                  const isUpvoted = commentHasUpvoted[comment.id] !== undefined
+                    ? commentHasUpvoted[comment.id]
+                    : (comment.hasUpvoted || false);
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => handleUpvoteCommentItem(comment.id)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold transition-all border shadow-sm ${
+                        isUpvoted
+                          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white'
+                          : 'bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white border-gray-200 dark:border-white/10'
+                      }`}
+                      title={isUpvoted ? 'Remove upvote' : 'Upvote QA report (Account required, cannot upvote own comment)'}
+                    >
+                      <ThumbsUp className={`w-3 h-3 ${isUpvoted ? 'fill-current' : ''}`} />
+                      <span>{commentUpvotes[comment.id] !== undefined ? commentUpvotes[comment.id] : (comment.upvotes || 0)}</span>
+                    </button>
+                  );
+                })()}
 
                 <button
                   onClick={() => {

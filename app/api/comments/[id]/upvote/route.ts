@@ -34,13 +34,47 @@ export async function POST(
       );
     }
 
-    const updated = await prisma.qAComment.update({
-      where: { id: commentId },
-      data: {
-        upvotes: { increment: 1 },
+    // Check if user already upvoted this comment
+    const existingUpvote = await prisma.commentUpvote.findUnique({
+      where: {
+        commentId_userId: {
+          commentId,
+          userId: session.userId,
+        },
       },
     });
-    return NextResponse.json({ success: true, upvotes: updated.upvotes });
+
+    let hasUpvoted = false;
+    let newUpvotesCount = comment.upvotes;
+
+    if (existingUpvote) {
+      // Cancel/Remove upvote
+      await prisma.commentUpvote.delete({
+        where: { id: existingUpvote.id },
+      });
+      const updated = await prisma.qAComment.update({
+        where: { id: commentId },
+        data: { upvotes: { decrement: 1 } },
+      });
+      newUpvotesCount = Math.max(0, updated.upvotes);
+      hasUpvoted = false;
+    } else {
+      // Add upvote
+      await prisma.commentUpvote.create({
+        data: {
+          commentId,
+          userId: session.userId,
+        },
+      });
+      const updated = await prisma.qAComment.update({
+        where: { id: commentId },
+        data: { upvotes: { increment: 1 } },
+      });
+      newUpvotesCount = updated.upvotes;
+      hasUpvoted = true;
+    }
+
+    return NextResponse.json({ success: true, upvotes: newUpvotesCount, hasUpvoted });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
   }

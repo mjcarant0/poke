@@ -37,14 +37,47 @@ export async function POST(
       );
     }
 
-    const updated = await prisma.projectPost.update({
-      where: { id: postId },
-      data: {
-        upvotes: { increment: 1 },
+    // Check if user already upvoted this post
+    const existingUpvote = await prisma.postUpvote.findUnique({
+      where: {
+        postId_userId: {
+          postId,
+          userId: session.userId,
+        },
       },
     });
 
-    return NextResponse.json({ success: true, upvotes: updated.upvotes });
+    let hasUpvoted = false;
+    let newUpvotesCount = post.upvotes;
+
+    if (existingUpvote) {
+      // User pressed upvote again -> REMOVE/CANCEL UPVOTE (decrease count by 1)
+      await prisma.postUpvote.delete({
+        where: { id: existingUpvote.id },
+      });
+      const updated = await prisma.projectPost.update({
+        where: { id: postId },
+        data: { upvotes: { decrement: 1 } },
+      });
+      newUpvotesCount = Math.max(0, updated.upvotes);
+      hasUpvoted = false;
+    } else {
+      // User upvoted for the first time -> ADD UPVOTE (increase count by 1)
+      await prisma.postUpvote.create({
+        data: {
+          postId,
+          userId: session.userId,
+        },
+      });
+      const updated = await prisma.projectPost.update({
+        where: { id: postId },
+        data: { upvotes: { increment: 1 } },
+      });
+      newUpvotesCount = updated.upvotes;
+      hasUpvoted = true;
+    }
+
+    return NextResponse.json({ success: true, upvotes: newUpvotesCount, hasUpvoted });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
   }

@@ -35,6 +35,7 @@ export interface ProjectPost {
   authorId?: string;
   images?: string[];
   upvotes: number;
+  hasUpvoted?: boolean;
   createdAt: string | Date;
   commentsCount?: number;
   slug?: string;
@@ -89,6 +90,7 @@ export interface QAComment {
   timestamp?: string | null;
   status: FeedbackStatus;
   upvotes: number;
+  hasUpvoted?: boolean;
   createdAt: string | Date;
   updatedAt: string | Date;
   labels?: CommentLabel[];

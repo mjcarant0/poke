@@ -4,8 +4,23 @@ import { getAuthenticatedUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const session = await getAuthenticatedUser(req);
+    const userUpvotedPostIds = new Set<string>();
+
+    if (session) {
+      try {
+        const upvotes = await prisma.postUpvote.findMany({
+          where: { userId: session.userId },
+          select: { postId: true },
+        });
+        upvotes.forEach((u) => userUpvotedPostIds.add(u.postId));
+      } catch (e) {
+        // Ignore upvote fetch errors
+      }
+    }
+
     const posts = await prisma.projectPost.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
@@ -29,6 +44,7 @@ export async function GET() {
       }
       return {
         ...p,
+        hasUpvoted: userUpvotedPostIds.has(p.id),
         images: imagesArray,
         commentsCount: p._count.comments,
       };

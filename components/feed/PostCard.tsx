@@ -13,6 +13,7 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [upvotes, setUpvotes] = useState(post.upvotes || 0);
+  const [hasUpvoted, setHasUpvoted] = useState(post.hasUpvoted || false);
   const [upvoteMsg, setUpvoteMsg] = useState<string | null>(null);
 
   const developerName =
@@ -30,7 +31,8 @@ export function PostCard({ post }: PostCardProps) {
       const data = await res.json();
       if (res.ok) {
         setUpvotes(data.upvotes);
-        setUpvoteMsg('Upvoted!');
+        setHasUpvoted(data.hasUpvoted);
+        setUpvoteMsg(data.hasUpvoted ? 'Upvoted!' : 'Upvote removed');
       } else {
         setUpvoteMsg(data.error || 'Cannot upvote.');
       }
@@ -102,10 +104,14 @@ export function PostCard({ post }: PostCardProps) {
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <button
               onClick={handleUpvote}
-              className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white text-xs font-extrabold transition-all border border-gray-200 dark:border-white/10"
-              title="Upvote post (Account required, cannot upvote own post)"
+              className={`inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-extrabold transition-all border shadow-sm ${
+                hasUpvoted
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white'
+                  : 'bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white border-gray-200 dark:border-white/10'
+              }`}
+              title={hasUpvoted ? 'Remove upvote' : 'Upvote post (Account required, cannot upvote own post)'}
             >
-              <ThumbsUp className="w-3.5 h-3.5" />
+              <ThumbsUp className={`w-3.5 h-3.5 ${hasUpvoted ? 'fill-current' : ''}`} />
               <span>{upvotes} Upvotes</span>
             </button>
 

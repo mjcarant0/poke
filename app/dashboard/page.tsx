@@ -20,7 +20,9 @@ function DeveloperDashboardContent() {
 
   const [typeFilter, setTypeFilter] = useState<FeedbackType | 'ALL'>('ALL');
   const [statusFilter, setStatusFilter] = useState<FeedbackStatus | 'ALL'>('ALL');
-  const [timeframe, setTimeframe] = useState<'today' | '24h' | 'week' | 'month' | 'all'>('today');
+  const [timeframe, setTimeframe] = useState<'today' | 'yesterday' | 'week' | 'month' | 'all' | 'custom'>('today');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -81,7 +83,11 @@ function DeveloperDashboardContent() {
     async function loadComments() {
       setLoadingComments(true);
       try {
-        const res = await fetch(`/api/posts/${currentPostId}/comments?timeframe=${timeframe}`);
+        let apiUrl = `/api/posts/${currentPostId}/comments?timeframe=${timeframe}`;
+        if (timeframe === 'custom' && customStartDate) {
+          apiUrl += `&startDate=${customStartDate}&endDate=${customEndDate}`;
+        }
+        const res = await fetch(apiUrl);
         if (res.ok) {
           const commentsData = await res.json();
           setComments(commentsData);
@@ -96,7 +102,7 @@ function DeveloperDashboardContent() {
     }
 
     loadComments();
-  }, [selectedPost, timeframe]);
+  }, [selectedPost, timeframe, customStartDate, customEndDate]);
 
   const handleStatusChange = async (commentId: string, newStatus: FeedbackStatus) => {
     setComments((prev) =>
@@ -290,22 +296,11 @@ function DeveloperDashboardContent() {
                   <div className="flex items-center gap-2.5 w-full md:w-auto flex-wrap">
                     <button
                       onClick={() => setIsFilterModalOpen(true)}
-                      className={`inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full text-xs font-extrabold transition-all border shadow-sm ${
-                        typeFilter !== 'ALL' || statusFilter !== 'ALL' || timeframe !== 'today'
-                          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white'
-                          : 'bg-white dark:bg-[#161b22] hover:bg-gray-100 dark:hover:bg-white/10 text-slate-900 dark:text-white border-gray-200 dark:border-white/10'
-                      }`}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full text-xs font-extrabold transition-all border border-gray-200 dark:border-white/10 bg-white dark:bg-[#161b22] hover:bg-gray-100 dark:hover:bg-white/10 text-slate-900 dark:text-white shadow-sm"
                     >
                       <Filter className="w-3.5 h-3.5" />
                       <span>Filter Reports</span>
-                      {(typeFilter !== 'ALL' || statusFilter !== 'ALL' || timeframe !== 'today') && (
-                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                      )}
                     </button>
-
-                    <span className="text-[11px] font-mono text-gray-500 dark:text-gray-400">
-                      showing {filteredComments.length} of {totalComments} reports
-                    </span>
                   </div>
                 </div>
 
@@ -439,11 +434,12 @@ function DeveloperDashboardContent() {
                           </label>
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {[
-                              { key: 'today', label: 'Fresh (Today)' },
-                              { key: '24h', label: 'Past 24 Hours' },
+                              { key: 'today', label: 'Today' },
+                              { key: 'yesterday', label: 'Yesterday' },
                               { key: 'week', label: 'This Week' },
                               { key: 'month', label: 'This Month' },
                               { key: 'all', label: 'All Time' },
+                              { key: 'custom', label: 'Custom Date' },
                             ].map((t) => (
                               <button
                                 key={t.key}
@@ -462,6 +458,30 @@ function DeveloperDashboardContent() {
                               </button>
                             ))}
                           </div>
+
+                          {timeframe === 'custom' && (
+                            <div className="grid grid-cols-2 gap-2 mt-3 p-3 rounded-2xl bg-gray-50 dark:bg-[#161b22] border border-gray-200 dark:border-white/10">
+                              <div>
+                                <label className="block text-[10px] font-bold text-gray-500 mb-1">Start Date</label>
+                                <input
+                                  type="date"
+                                  value={customStartDate}
+                                  onChange={(e) => setCustomStartDate(e.target.value)}
+                                  className="w-full bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-white outline-none"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-[10px] font-bold text-gray-500 mb-1">End Date</label>
+                                <input
+                                  type="date"
+                                  value={customEndDate}
+                                  onChange={(e) => setCustomEndDate(e.target.value)}
+                                  className="w-full bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-white outline-none"
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -472,6 +492,8 @@ function DeveloperDashboardContent() {
                             setTypeFilter('ALL');
                             setStatusFilter('ALL');
                             setTimeframe('today');
+                            setCustomStartDate('');
+                            setCustomEndDate('');
                           }}
                           className="px-4 py-2 rounded-full text-xs font-bold text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors"
                         >

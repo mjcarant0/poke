@@ -11,38 +11,41 @@ generator client {
 }
 
 model User {
-  id        String        @id @default(cuid())
-  name      String
-  username  String        @unique
-  email     String        @unique
-  password  String
-  createdAt DateTime      @default(now())
-  posts     ProjectPost[]
+  id             String          @id @default(cuid())
+  name           String
+  username       String          @unique
+  email          String          @unique
+  password       String
+  createdAt      DateTime        @default(now())
+  posts          ProjectPost[]
+  postUpvotes    PostUpvote[]
+  commentUpvotes CommentUpvote[]
 }
 
 model ProjectPost {
-  id          String      @id @default(cuid())
+  id          String       @id @default(cuid())
   title       String
   description String
   url         String
-  category    String      @default("SaaS App")
+  category    String       @default("SaaS App")
   authorEmail String
   authorId    String?
-  author      User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author      User?        @relation(fields: [authorId], references: [id], onDelete: SetNull)
   images      String?
-  upvotes     Int         @default(0)
-  createdAt   DateTime    @default(now())
+  upvotes     Int          @default(0)
+  createdAt   DateTime     @default(now())
   comments    QAComment[]
   labels      Label[]
+  upvoteList  PostUpvote[]
 }
 
 model QAComment {
-  id               String         @id @default(cuid())
+  id               String          @id @default(cuid())
   postId           String
-  post             ProjectPost    @relation(fields: [postId], references: [id], onDelete: Cascade)
-  type             String         @default("GENERAL")
+  post             ProjectPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  type             String          @default("GENERAL")
   qaNotes          String
-  authorName       String         @default("Anonymous")
+  authorName       String          @default("Anonymous")
   authorId         String?
   screenshotUrl    String?
   screenshots      String?
@@ -53,12 +56,35 @@ model QAComment {
   screenResolution String?
   referrer         String?
   timestamp        String?
-  status           String         @default("NEW")
-  upvotes          Int            @default(0)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  status           String          @default("NEW")
+  upvotes          Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
   labels           CommentLabel[]
   replies          QAReply[]
+  upvoteList       CommentUpvote[]
+}
+
+model PostUpvote {
+  id        String      @id @default(cuid())
+  postId    String
+  post      ProjectPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+
+  @@unique([postId, userId])
+}
+
+model CommentUpvote {
+  id        String    @id @default(cuid())
+  commentId String
+  comment   QAComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@unique([commentId, userId])
 }
 
 model QAReply {

@@ -14,24 +14,30 @@ export async function GET(
   try {
     const postId = params.id;
     const { searchParams } = new URL(req.url);
-    const timeframe = searchParams.get('timeframe') || 'all';
+    const timeframe = searchParams.get('timeframe') || 'today';
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
 
-    let dateFilter: Date | undefined;
+    const whereCondition: any = { postId };
     const now = new Date();
 
     if (timeframe === 'today') {
-      dateFilter = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    } else if (timeframe === '24h') {
-      dateFilter = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      whereCondition.createdAt = { gte: startOfToday };
+    } else if (timeframe === 'yesterday') {
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfYesterday = new Date(startOfToday.getTime() - 24 * 60 * 60 * 1000);
+      whereCondition.createdAt = { gte: startOfYesterday, lt: startOfToday };
     } else if (timeframe === 'week') {
-      dateFilter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      whereCondition.createdAt = { gte: weekAgo };
     } else if (timeframe === 'month') {
-      dateFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    }
-
-    const whereCondition: any = { postId };
-    if (dateFilter) {
-      whereCondition.createdAt = { gte: dateFilter };
+      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      whereCondition.createdAt = { gte: monthAgo };
+    } else if (timeframe === 'custom' && startDateParam) {
+      const startD = new Date(startDateParam);
+      const endD = endDateParam ? new Date(`${endDateParam}T23:59:59.999Z`) : new Date();
+      whereCondition.createdAt = { gte: startD, lte: endD };
     }
 
     try {
@@ -59,6 +65,21 @@ export async function GET(
         }
       });
 
+      const session = await getAuthenticatedUser(req);
+      const userUpvotedCommentIds = new Set<string>();
+
+      if (session) {
+        try {
+          const upvotes = await prisma.commentUpvote.findMany({
+            where: { userId: session.userId },
+            select: { commentId: true },
+          });
+          upvotes.forEach((u) => userUpvotedCommentIds.add(u.commentId));
+        } catch (e) {
+          // Ignore upvote fetch errors
+        }
+      }
+
       const formatted = combined.map((c) => {
         let screenshotsList: string[] = [];
         if (c.screenshots) {
@@ -73,6 +94,7 @@ export async function GET(
         }
         return {
           ...c,
+          hasUpvoted: userUpvotedCommentIds.has(c.id),
           screenshots: screenshotsList,
         };
       });
