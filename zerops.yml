@@ -2,6 +2,8 @@ zerops:
   - setup: app
     build:
       base: nodejs@22
+      prepareCommands:
+        - sudo apk add --no-cache openssl
       buildCommands:
         - npm ci
         - npx prisma generate
@@ -16,6 +18,8 @@ zerops:
         - next.config.mjs
     run:
       base: nodejs@22
+      prepareCommands:
+        - sudo apk add --no-cache openssl
       envVariables:
         DATABASE_URL: ${db_connectionString}
       initCommands:
@@ -24,5 +28,6 @@ zerops:
         - port: 3000
           httpSupport: true
       start: npm start
+
 
 
