@@ -16,8 +16,10 @@ zerops:
         - next.config.mjs
     run:
       base: nodejs@22
+      envVariables:
+        DATABASE_URL: ${db_connectionString}
       prepareCommands:
-        - npx prisma db push --skip-generate
+        - DATABASE_URL="${db_connectionString}" npx prisma db push --accept-data-loss
       ports:
         - port: 3000
           httpSupport: true
