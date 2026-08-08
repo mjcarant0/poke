@@ -17,9 +17,9 @@ zerops:
     run:
       base: nodejs@22
       envVariables:
-        DATABASE_URL: ${db_connectionString}
+        DATABASE_URL: ${db_connectionString}/db
       prepareCommands:
-        - DATABASE_URL="${db_connectionString}" npx prisma db push --accept-data-loss
+        - npx prisma db push --accept-data-loss
       ports:
         - port: 3000
           httpSupport: true
