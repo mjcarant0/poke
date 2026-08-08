@@ -1,0 +1,129 @@
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { ProjectPost } from '@/types';
+import { ExternalLink, MessageSquareText, Globe, ImageIcon } from 'lucide-react';
+
+interface PostCardProps {
+  post: ProjectPost;
+  onUpvotePost?: (postId: string) => void;
+}
+
+export function PostCard({ post }: PostCardProps) {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  // Extract clean developer name from author or author email
+  const developerName =
+    post.author?.name ||
+    post.author?.username ||
+    (post.authorEmail && post.authorEmail.includes('@')
+      ? post.authorEmail.split('@')[0]
+      : post.authorEmail || 'Developer');
+
+  // Format relative timestamp
+  const getRelativeTime = (dateVal: string | Date) => {
+    try {
+      const timestamp = typeof dateVal === 'string' ? new Date(dateVal).getTime() : dateVal.getTime();
+      const diff = Math.floor((Date.now() - timestamp) / 1000);
+      if (isNaN(diff) || diff < 0) return 'Just now';
+      if (diff < 60) return `${diff}s ago`;
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+      return `${Math.floor(diff / 86400)}d ago`;
+    } catch {
+      return 'Recently';
+    }
+  };
+
+  const imagesList = post.images || [];
+
+  return (
+    <div className="poke-card p-5 rounded-3xl dark:bg-[#0d1117] dark:border-white/10 shadow-sm transition-all hover:shadow-md border border-gray-200">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        {/* Main Post Details */}
+        <div className="flex-1 min-w-0">
+          {/* Category Badge & Developer Info */}
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-white dark:bg-white dark:text-slate-900 uppercase">
+              {post.category}
+            </span>
+
+            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+              Posted by <span className="font-bold text-slate-800 dark:text-gray-200">{developerName}</span> · {getRelativeTime(post.createdAt)}
+            </span>
+          </div>
+
+          {/* Post Title */}
+          <Link href={`/post/${post.id}`} className="block group">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight group-hover:underline mb-1">
+              {post.title}
+            </h3>
+          </Link>
+
+          {/* Description */}
+          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed mb-4">
+            {post.description}
+          </p>
+
+          {/* Developer Attached Screenshots Grid */}
+          {imagesList.length > 0 && (
+            <div className="mb-4">
+              <div className="flex items-center gap-1.5 mb-2 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>Project Screenshots ({imagesList.length})</span>
+              </div>
+              <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+                {imagesList.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedImage(img)}
+                    className="flex-shrink-0 w-28 h-20 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:scale-105 transition-transform"
+                  >
+                    <img src={img} alt={`${post.title} screenshot ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Action Links */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <a
+              href={post.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 text-xs font-extrabold shadow-sm transition-all"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>Test Live App</span>
+              <ExternalLink className="w-3 h-3 ml-0.5" />
+            </a>
+
+            <Link
+              href={`/post/${post.id}`}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white text-xs font-extrabold transition-colors border border-gray-200 dark:border-white/10"
+            >
+              <MessageSquareText className="w-3.5 h-3.5" />
+              <span>{post.commentsCount || 0} QA Reports & Comments</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Image Modal Lightbox */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl">
+            <img src={selectedImage} alt="Enlarged view" className="max-w-full max-h-[85vh] object-contain rounded-2xl" />
+            <p className="text-center text-xs font-bold text-gray-300 mt-2">Click anywhere to close preview</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

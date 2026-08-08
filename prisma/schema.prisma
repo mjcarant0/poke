@@ -1,0 +1,86 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String        @id @default(cuid())
+  name      String
+  username  String        @unique
+  email     String        @unique
+  password  String
+  createdAt DateTime      @default(now())
+  posts     ProjectPost[]
+}
+
+model ProjectPost {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  url         String
+  category    String      @default("SaaS")
+  authorEmail String
+  authorId    String?
+  author      User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  images      String?
+  upvotes     Int         @default(0)
+  createdAt   DateTime    @default(now())
+  comments    QAComment[]
+  labels      Label[]
+}
+
+model QAComment {
+  id               String         @id @default(cuid())
+  postId           String
+  post             ProjectPost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  type             String         @default("GENERAL")
+  qaNotes          String
+  screenshotUrl    String?
+  screenshots      String?
+  pageTested       String?
+  browser          String?
+  os               String?
+  deviceType       String?
+  screenResolution String?
+  referrer         String?
+  timestamp        String?
+  status           String         @default("NEW")
+  upvotes          Int            @default(0)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  labels           CommentLabel[]
+  replies          QAReply[]
+}
+
+model QAReply {
+  id         String    @id @default(cuid())
+  commentId  String
+  comment    QAComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  authorName String    @default("Reviewer")
+  authorRole String    @default("REVIEWER") // "DEVELOPER" or "REVIEWER"
+  content    String
+  createdAt  DateTime  @default(now())
+}
+
+model Label {
+  id       String         @id @default(cuid())
+  postId   String
+  post     ProjectPost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  name     String
+  color    String         @default("#3b82f6")
+  comments CommentLabel[]
+}
+
+model CommentLabel {
+  id        String    @id @default(cuid())
+  commentId String
+  comment   QAComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  labelId   String
+  label     Label     @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, labelId])
+}
