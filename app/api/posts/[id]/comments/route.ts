@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 // Persistent in-memory storage fallback
 const inMemoryComments: Record<string, any[]> = {};
 
@@ -56,11 +58,10 @@ export async function GET(
       return NextResponse.json(formatted);
     } catch (dbErr) {
       const memoryList = inMemoryComments[postId] || [];
-      const mockFiltered = MOCK_QA_COMMENTS.filter((c) => c.postId === postId);
-      return NextResponse.json([...memoryList, ...mockFiltered]);
+      return NextResponse.json(memoryList);
     }
-  } catch (err) {
-    return NextResponse.json(MOCK_QA_COMMENTS);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Comments fetch error' }, { status: 500 });
   }
 }
 
@@ -173,7 +174,6 @@ export async function POST(
 
       if (!inMemoryComments[postId]) inMemoryComments[postId] = [];
       inMemoryComments[postId].unshift(fallbackComment);
-      MOCK_QA_COMMENTS.unshift(fallbackComment as any);
 
       return NextResponse.json(fallbackComment, { status: 201 });
     }
