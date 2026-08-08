@@ -18,16 +18,13 @@ function DeveloperDashboardContent() {
   const [loading, setLoading] = useState(true);
   const [loadingComments, setLoadingComments] = useState(false);
 
-  // Filters state
   const [typeFilter, setTypeFilter] = useState<FeedbackType | 'ALL'>('ALL');
   const [statusFilter, setStatusFilter] = useState<FeedbackStatus | 'ALL'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Modal state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | null>(null);
 
-  // Load current user and their specific posts
   useEffect(() => {
     async function initDashboard() {
       setLoading(true);
@@ -46,7 +43,6 @@ function DeveloperDashboardContent() {
         if (postsRes.ok) {
           const postsData: ProjectPost[] = await postsRes.json();
           if (currentUser) {
-            // Filter posts belonging strictly to the logged in user
             const userPosts = postsData.filter((p: any) =>
               (p.authorId && p.authorId === currentUser.id) ||
               (p.authorEmail && p.authorEmail.toLowerCase() === currentUser.email?.toLowerCase()) ||
@@ -64,7 +60,7 @@ function DeveloperDashboardContent() {
           }
         }
       } catch (err) {
-        // Silent error
+        // Ignore fetch errors
       } finally {
         setLoading(false);
       }
@@ -73,7 +69,6 @@ function DeveloperDashboardContent() {
     initDashboard();
   }, []);
 
-  // Fetch comments whenever selectedPost changes
   useEffect(() => {
     const currentPostId = selectedPost?.id;
     if (!currentPostId) {
@@ -113,7 +108,7 @@ function DeveloperDashboardContent() {
         body: JSON.stringify({ status: newStatus }),
       });
     } catch (e) {
-      // Ignore
+      // Ignore network patch errors
     }
   };
 
@@ -123,31 +118,34 @@ function DeveloperDashboardContent() {
     );
   };
 
-  const handlePostCreated = (newPost: any) => {
-    const formattedPost: ProjectPost = {
-      id: newPost.id || 'post_' + Date.now(),
-      title: newPost.title,
-      description: newPost.description,
-      url: newPost.url,
-      category: newPost.category,
-      authorEmail: newPost.authorEmail || user?.email || 'dev@poke-app.dev',
-      authorId: user?.id,
-      upvotes: 0,
-      createdAt: new Date().toISOString(),
-      commentsCount: 0,
-    };
-
-    setPosts((prev) => [formattedPost, ...prev]);
-    setSelectedPost(formattedPost);
+  const handlePostCreated = async () => {
+    try {
+      const postsRes = await fetch('/api/posts');
+      if (postsRes.ok) {
+        const postsData: ProjectPost[] = await postsRes.json();
+        if (user) {
+          const userPosts = postsData.filter((p: any) =>
+            (p.authorId && p.authorId === user.id) ||
+            (p.authorEmail && p.authorEmail.toLowerCase() === user.email?.toLowerCase()) ||
+            (p.author?.username && p.author.username.toLowerCase() === user.username?.toLowerCase())
+          );
+          setPosts(userPosts);
+          if (userPosts.length > 0) {
+            setSelectedPost(userPosts[0]);
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore reload error
+    }
   };
 
-  // Counts
+
   const totalComments = comments.length;
   const bugCount = comments.filter((c) => c.type === 'BUG').length;
   const featureCount = comments.filter((c) => c.type === 'FEATURE').length;
   const generalCount = comments.filter((c) => c.type === 'GENERAL').length;
 
-  // Filtering
   const filteredComments = comments.filter((c) => {
     if (typeFilter !== 'ALL' && c.type !== typeFilter) return false;
     if (statusFilter !== 'ALL' && c.status !== statusFilter) return false;
@@ -162,25 +160,25 @@ function DeveloperDashboardContent() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f4f4f6] dark:bg-[#090d16] text-slate-900 dark:text-gray-100 flex flex-col transition-colors">
+    <div className="min-h-screen bg-[#f4f4f6] dark:bg-[#090d16] text-slate-900 dark:text-gray-100 flex flex-col transition-colors overflow-x-hidden">
       {/* Top Navbar */}
       <Navbar onOpenCreatePostModal={() => setIsCreateModalOpen(true)} />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {loading ? (
           <div className="flex items-center justify-center py-32 text-gray-400 gap-2">
             <RefreshCw className="w-6 h-6 animate-spin text-slate-900 dark:text-white" />
             <span className="text-sm font-semibold">Loading dashboard...</span>
           </div>
         ) : !user ? (
-          /* Logged Out Lock Prompt */
-          <div className="max-w-md mx-auto my-12 poke-card p-8 rounded-3xl text-center shadow-lg dark:bg-[#0d1117] dark:border-white/10">
-            <div className="w-14 h-14 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <Lock className="w-7 h-7" />
+          /* Unauthenticated state prompt */
+          <div className="max-w-md mx-auto my-8 sm:my-12 poke-card p-6 sm:p-8 rounded-3xl text-center shadow-lg dark:bg-[#0d1117] dark:border-white/10">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <Lock className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
 
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mb-2">
+            <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white mb-2">
               Developer Account Required
             </h2>
 
@@ -207,22 +205,22 @@ function DeveloperDashboardContent() {
             </div>
           </div>
         ) : (
-          /* Logged In Developer Dashboard */
+          /* Developer Dashboard View */
           <>
             {/* Header Bar */}
-            <div className="poke-card p-6 rounded-3xl mb-6 dark:bg-[#0d1117] dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+            <div className="poke-card p-5 sm:p-6 rounded-3xl mb-6 dark:bg-[#0d1117] dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-mono font-medium">
                     Logged in as @{user.username || user.name}
                   </span>
                 </div>
-                <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                   QA Inspection Dashboard
                 </h1>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 {posts.length > 0 && selectedPost && (
                   <select
                     value={selectedPost.id}
@@ -242,7 +240,7 @@ function DeveloperDashboardContent() {
 
                 <button
                   onClick={() => setIsCreateModalOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-xs shadow-sm transition-all whitespace-nowrap"
+                  className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-xs shadow-sm transition-all whitespace-nowrap"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create New Post</span>
@@ -251,7 +249,7 @@ function DeveloperDashboardContent() {
             </div>
 
             {posts.length === 0 ? (
-              <div className="poke-card p-12 text-center flex flex-col items-center justify-center dark:bg-[#0d1117] rounded-3xl">
+              <div className="poke-card p-8 sm:p-12 text-center flex flex-col items-center justify-center dark:bg-[#0d1117] rounded-3xl">
                 <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-400 mb-3">
                   <Inbox className="w-6 h-6" />
                 </div>
@@ -271,10 +269,10 @@ function DeveloperDashboardContent() {
               </div>
             ) : (
               <>
-                {/* 1. QA Activity Line Graph Component (First sight before comments) */}
+                {/* Activity line graph visualization */}
                 <QALineGraph comments={comments} />
 
-                {/* 2. Type Classification Filter Pills */}
+                {/* Filter buttons */}
                 <div className="mb-4">
                   <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-2">
                     Filter Reports by Type
@@ -282,7 +280,7 @@ function DeveloperDashboardContent() {
                   <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
                     <button
                       onClick={() => setTypeFilter('ALL')}
-                      className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap ${
+                      className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap ${
                         typeFilter === 'ALL'
                           ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
                           : 'bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10'
@@ -293,7 +291,7 @@ function DeveloperDashboardContent() {
 
                     <button
                       onClick={() => setTypeFilter('BUG')}
-                      className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                      className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                         typeFilter === 'BUG'
                           ? 'bg-rose-600 text-white shadow-sm'
                           : 'bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-rose-600 dark:text-rose-400 border border-gray-200 dark:border-white/10'
@@ -305,7 +303,7 @@ function DeveloperDashboardContent() {
 
                     <button
                       onClick={() => setTypeFilter('FEATURE')}
-                      className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                      className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                         typeFilter === 'FEATURE'
                           ? 'bg-amber-600 text-white shadow-sm'
                           : 'bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-amber-600 dark:text-amber-400 border border-gray-200 dark:border-white/10'
@@ -317,7 +315,7 @@ function DeveloperDashboardContent() {
 
                     <button
                       onClick={() => setTypeFilter('GENERAL')}
-                      className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                      className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                         typeFilter === 'GENERAL'
                           ? 'bg-blue-600 text-white shadow-sm'
                           : 'bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-blue-600 dark:text-blue-400 border border-gray-200 dark:border-white/10'
@@ -343,11 +341,11 @@ function DeveloperDashboardContent() {
                   </div>
 
                   <div className="flex items-center gap-2 w-full md:w-auto">
-                    <Filter className="w-3.5 h-3.5 text-gray-400" />
+                    <Filter className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value as FeedbackStatus | 'ALL')}
-                      className="bg-gray-50 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-full px-3 py-1.5 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-bold"
+                      className="w-full md:w-auto bg-gray-50 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-full px-3 py-1.5 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-bold"
                     >
                       <option value="ALL">All Statuses</option>
                       <option value="NEW">NEW</option>
@@ -380,7 +378,7 @@ function DeveloperDashboardContent() {
         )}
       </main>
 
-      {/* Repeatable Footer Component */}
+      {/* Footer Component */}
       <Footer />
 
       {/* Create Post Modal */}
@@ -419,3 +417,4 @@ export default function DashboardPage() {
     </Suspense>
   );
 }
+

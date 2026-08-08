@@ -20,12 +20,10 @@ export function SubmitProjectModal({
   const [ownerEmail, setOwnerEmail] = useState('developer@poke-app.dev');
   const [images, setImages] = useState<string[]>([]);
 
-  // Validation state
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Auto pre-fill owner email with logged in account's email
   useEffect(() => {
     try {
       const stored = localStorage.getItem('poke_user');
@@ -36,7 +34,7 @@ export function SubmitProjectModal({
         }
       }
     } catch (e) {
-      // Ignore
+      // Ignore read errors
     }
 
     async function fetchMe() {
@@ -49,7 +47,7 @@ export function SubmitProjectModal({
           }
         }
       } catch (err) {
-        // Ignore
+        // Ignore auth fetch errors
       }
     }
 
@@ -57,6 +55,14 @@ export function SubmitProjectModal({
   }, []);
 
   const isEmailValid = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+
+  const isUrlValid = (val: string) => {
+    const trimmed = val.trim();
+    if (!trimmed) return false;
+    const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(:\d+)?(\/.*)?$/i;
+    const localhostPattern = /^(https?:\/\/)?localhost(:\d+)?(\/.*)?$/i;
+    return urlPattern.test(trimmed) || localhostPattern.test(trimmed);
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -68,7 +74,7 @@ export function SubmitProjectModal({
     const filesToProcess = Array.from(files).slice(0, remainingSlots);
 
     filesToProcess.forEach((file) => {
-      if (file.size > 5 * 1024 * 1024) return; // 5MB limit
+      if (file.size > 5 * 1024 * 1024) return;
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
@@ -87,7 +93,11 @@ export function SubmitProjectModal({
     const errs: Record<string, string> = {};
     if (!title.trim()) errs.title = 'Project title is required.';
     if (!description.trim()) errs.description = 'Testing description is required.';
-    if (!url.trim()) errs.url = 'Website URL is required.';
+    if (!url.trim()) {
+      errs.url = 'Website URL is required.';
+    } else if (!isUrlValid(url)) {
+      errs.url = 'Please enter a valid website URL (e.g. https://my-app.com or my-app.com).';
+    }
     if (!ownerEmail.trim()) {
       errs.ownerEmail = 'Owner email address is required.';
     } else if (!isEmailValid(ownerEmail)) {
@@ -95,6 +105,7 @@ export function SubmitProjectModal({
     }
     return errs;
   };
+
 
   const fieldErrors = getFieldErrors();
 
@@ -110,15 +121,21 @@ export function SubmitProjectModal({
     setLoading(true);
     setError(null);
 
+    let formattedUrl = url.trim();
+    if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
+
     const payload = {
       title,
       description,
-      url: url.startsWith('http') ? url : `https://${url}`,
+      url: formattedUrl,
       category,
       authorEmail: ownerEmail,
       ownerEmail,
       images,
     };
+
 
     try {
       const res = await fetch('/api/posts', {
@@ -146,16 +163,16 @@ export function SubmitProjectModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-y-auto">
-      <div className="w-full max-w-lg bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl text-slate-900 dark:text-gray-100 transition-colors my-8">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fadeIn overflow-y-auto">
+      <div className="w-full max-w-lg bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-3xl p-4 sm:p-6 shadow-2xl text-slate-900 dark:text-gray-100 transition-colors my-auto max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-white/10 mb-6">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-gray-100 dark:border-white/10 mb-4 sm:mb-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-extrabold text-sm">
+            <div className="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-extrabold text-sm shrink-0">
               <Plus className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
+              <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
                 Submit New Project
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -231,16 +248,15 @@ export function SubmitProjectModal({
             )}
           </div>
 
-          {/* Website Screenshots Upload Section */}
+          {/* Screenshots attachment */}
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1 flex items-center gap-1.5">
               <ImageIcon className="w-3.5 h-3.5 text-gray-400" />
               <span>Website Screenshots / Images <span className="text-gray-400 font-normal">(Optional, {images.length}/5)</span></span>
             </label>
 
-            {/* Thumbnail Previews Grid */}
             {images.length > 0 && (
-              <div className="grid grid-cols-5 gap-2 mb-2">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-2">
                 {images.map((img, idx) => (
                   <div key={idx} className="relative group aspect-video rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5">
                     <img src={img} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
@@ -356,3 +372,4 @@ export function SubmitProjectModal({
     </div>
   );
 }
+

@@ -84,16 +84,16 @@ export function AccountSettingsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-y-auto">
-      <div className="w-full max-w-md bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl text-slate-900 dark:text-gray-100 transition-colors my-8">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fadeIn overflow-y-auto">
+      <div className="w-full max-w-md bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-3xl p-4 sm:p-6 shadow-2xl text-slate-900 dark:text-gray-100 transition-colors my-auto max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-white/10 mb-6">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-gray-100 dark:border-white/10 mb-4 sm:mb-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-extrabold text-sm">
+            <div className="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-extrabold text-sm shrink-0">
               <User className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
+              <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
                 Account Settings
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -170,7 +170,7 @@ export function AccountSettingsModal({
             />
           </div>
 
-          {/* Divider for Password Security */}
+          {/* Password update section */}
           <div className="pt-2 pb-1 border-t border-gray-100 dark:border-white/10">
             <h4 className="text-xs font-extrabold text-slate-900 dark:text-white mb-2 flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-gray-400" />
@@ -237,3 +237,4 @@ export function AccountSettingsModal({
     </div>
   );
 }
+

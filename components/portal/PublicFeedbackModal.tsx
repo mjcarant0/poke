@@ -62,10 +62,10 @@ export function PublicFeedbackModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-white border border-gray-200 rounded-3xl p-6 text-slate-900 shadow-2xl relative animate-fadeIn">
-        <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-5">
-          <h3 className="text-base font-extrabold text-slate-900">Post Public Suggestion</h3>
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="w-full max-w-lg bg-white border border-gray-200 rounded-3xl p-4 sm:p-6 text-slate-900 shadow-2xl relative animate-fadeIn my-auto max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-gray-100 mb-4 sm:mb-5">
+          <h3 className="text-sm sm:text-base font-extrabold text-slate-900">Post Public Suggestion</h3>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-slate-700 flex items-center justify-center"
@@ -75,11 +75,11 @@ export function PublicFeedbackModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex items-center gap-1.5 p-1 bg-gray-100 rounded-full">
+          <div className="flex flex-col sm:flex-row items-stretch gap-1.5 p-1 bg-gray-100 rounded-2xl sm:rounded-full">
             <button
               type="button"
               onClick={() => setType('FEATURE')}
-              className={`flex-1 py-1.5 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
+              className={`flex-1 py-1.5 rounded-xl sm:rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
                 type === 'FEATURE' ? 'bg-slate-900 text-white' : 'text-gray-600 hover:text-slate-900'
               }`}
             >
@@ -89,7 +89,7 @@ export function PublicFeedbackModal({
             <button
               type="button"
               onClick={() => setType('BUG')}
-              className={`flex-1 py-1.5 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
+              className={`flex-1 py-1.5 rounded-xl sm:rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
                 type === 'BUG' ? 'bg-slate-900 text-white' : 'text-gray-600 hover:text-slate-900'
               }`}
             >
@@ -99,7 +99,7 @@ export function PublicFeedbackModal({
             <button
               type="button"
               onClick={() => setType('GENERAL')}
-              className={`flex-1 py-1.5 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
+              className={`flex-1 py-1.5 rounded-xl sm:rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
                 type === 'GENERAL' ? 'bg-slate-900 text-white' : 'text-gray-600 hover:text-slate-900'
               }`}
             >
@@ -151,3 +151,4 @@ export function PublicFeedbackModal({
     </div>
   );
 }
+

@@ -31,23 +31,8 @@ export default function HomePage() {
   useEffect(() => {
     loadPosts();
 
-    const handleNewPost = (e: any) => {
-      if (e.detail) {
-        const formatted: ProjectPost = {
-          id: e.detail.id || 'post_' + Date.now(),
-          title: e.detail.title,
-          description: e.detail.description,
-          url: e.detail.url,
-          category: e.detail.category,
-          authorEmail: e.detail.authorEmail || e.detail.ownerEmail || 'dev@poke-app.dev',
-          upvotes: 0,
-          createdAt: new Date().toISOString(),
-          commentsCount: 0,
-        };
-        setPosts((prev) => [formatted, ...prev]);
-      } else {
-        loadPosts();
-      }
+    const handleNewPost = () => {
+      loadPosts();
     };
 
     window.addEventListener('poke_post_created', handleNewPost);
@@ -60,41 +45,31 @@ export default function HomePage() {
     );
   };
 
-  const handlePostCreated = (newPost: any) => {
-    const formattedPost: ProjectPost = {
-      id: newPost.id || 'post_' + Date.now(),
-      title: newPost.title,
-      description: newPost.description,
-      url: newPost.url,
-      category: newPost.category,
-      authorEmail: newPost.ownerEmail || newPost.authorEmail || 'dev@poke-app.dev',
-      upvotes: 0,
-      createdAt: new Date().toISOString(),
-      commentsCount: 0,
-    };
-    setPosts((prev) => [formattedPost, ...prev]);
+  const handlePostCreated = () => {
+    loadPosts();
   };
 
+
   return (
-    <div className="min-h-screen bg-[#f4f4f6] dark:bg-[#090d16] text-slate-900 dark:text-gray-100 flex flex-col transition-colors">
-      {/* Navbar with Home, Feed, Dashboard, Auth & Theme Toggle */}
+    <div className="min-h-screen bg-[#f4f4f6] dark:bg-[#090d16] text-slate-900 dark:text-gray-100 flex flex-col transition-colors overflow-x-hidden">
+      {/* Top Navbar */}
       <Navbar onOpenCreatePostModal={() => setIsCreateModalOpen(true)} />
 
       {/* Hero Section */}
-      <section className="max-w-5xl w-full mx-auto px-6 pt-16 pb-12 text-center">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1] mb-6">
+      <section className="max-w-5xl w-full mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-8 sm:pb-12 text-center">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.15] mb-4 sm:mb-6">
           The Direct Feedback Platform for Web Applications
         </h1>
 
-        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed mb-8">
+        <p className="text-sm sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed mb-6 sm:mb-8">
           Developers submit project URLs to gather real-user QA inspection reports. Reviewers test web apps and log detailed feedback without friction.
         </p>
 
-        {/* CTA Button Group */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        {/* Action button triggers */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-md sm:max-w-none mx-auto">
           <Link
             href="/feed"
-            className="w-full sm:w-auto px-6 py-3 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-sm"
+            className="w-full sm:w-auto px-6 py-3 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-sm"
           >
             <MessageSquareText className="w-4 h-4" />
             <span>Explore Reviewer Feed</span>
@@ -103,7 +78,7 @@ export default function HomePage() {
 
           <Link
             href="/dashboard"
-            className="w-full sm:w-auto px-6 py-3 rounded-full bg-white hover:bg-gray-100 dark:bg-white/10 dark:hover:bg-white/15 text-slate-900 dark:text-white font-extrabold text-sm flex items-center justify-center gap-2 transition-all border border-gray-200 dark:border-white/10"
+            className="w-full sm:w-auto px-6 py-3 rounded-full bg-white hover:bg-gray-100 dark:bg-white/10 dark:hover:bg-white/15 text-slate-900 dark:text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all border border-gray-200 dark:border-white/10"
           >
             <SlidersHorizontal className="w-4 h-4" />
             <span>Developer Dashboard</span>
@@ -111,10 +86,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Recent Submissions Feed Preview */}
-      <section className="max-w-5xl w-full mx-auto px-6 pb-20 flex-1">
-        <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200 dark:border-white/10">
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+      {/* Submissions Feed Preview */}
+      <section className="max-w-5xl w-full mx-auto px-4 sm:px-6 pb-16 sm:pb-20 flex-1">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 pb-2 border-b border-gray-200 dark:border-white/10">
+          <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Recent Submissions
           </h2>
 
@@ -128,9 +103,9 @@ export default function HomePage() {
         </div>
 
         {posts.length === 0 ? (
-          <div className="poke-card p-12 text-center flex flex-col items-center justify-center dark:bg-[#0d1117] rounded-3xl">
+          <div className="poke-card p-8 sm:p-12 text-center flex flex-col items-center justify-center dark:bg-[#0d1117] rounded-3xl">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">No Projects Submitted Yet</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Be the first developer to submit a project for community review!</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Be the first developer to submit a project for community review.</p>
             <button
               onClick={() => setIsCreateModalOpen(true)}
               className="px-4 py-2 rounded-full bg-slate-900 text-white text-xs font-bold"
@@ -147,7 +122,7 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Repeatable Footer Component */}
+      {/* Footer Component */}
       <Footer />
 
       {/* Create Post Modal */}
@@ -160,3 +135,4 @@ export default function HomePage() {
     </div>
   );
 }
+

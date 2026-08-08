@@ -6,14 +6,14 @@ import Link from 'next/link';
 export function Footer() {
   return (
     <footer className="w-full bg-white dark:bg-[#0d1117] border-t border-gray-200 dark:border-white/10 py-6 transition-colors mt-auto">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
         {/* Brand Text */}
-        <div className="font-extrabold text-slate-900 dark:text-white tracking-tight">
+        <div className="font-extrabold text-slate-900 dark:text-white tracking-tight text-center sm:text-left">
           POKE — QA Review Platform
         </div>
 
         {/* Navigation Links */}
-        <div className="flex items-center gap-6 font-semibold text-gray-600 dark:text-gray-400">
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-semibold text-gray-600 dark:text-gray-400">
           <Link
             href="/"
             className="hover:text-slate-900 dark:hover:text-white transition-colors"
@@ -37,3 +37,4 @@ export function Footer() {
     </footer>
   );
 }
+

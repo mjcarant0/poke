@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { QAComment, FeedbackType } from '@/types';
 import { autoCaptureBrowserSpecs } from '@/lib/user-agent';
-import { Send, Upload, X, AlertCircle, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Send, Upload, AlertCircle, Image as ImageIcon, Trash2 } from 'lucide-react';
 
 interface QACommentFormProps {
   postId: string;
@@ -19,7 +19,6 @@ export function QACommentForm({
   const [qaNotes, setQaNotes] = useState('');
   const [pageTested, setPageTested] = useState('');
 
-  // Auto-captured metadata state
   const [specs, setSpecs] = useState<{
     browser: string;
     os: string;
@@ -36,7 +35,6 @@ export function QACommentForm({
     referrer: '',
   });
 
-  // Validation error states
   const [errors, setErrors] = useState<{
     notes?: string;
     pageTested?: string;
@@ -51,7 +49,6 @@ export function QACommentForm({
     file?: boolean;
   }>({});
 
-  // Multiple File upload state (up to 5 images)
   const [screenshots, setScreenshots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -115,7 +112,7 @@ export function QACommentForm({
         newErrors.targetElement = 'Specific target element or button area is required for Bug Reports.';
       }
       if (screenshots.length === 0) {
-        newErrors.file = 'At least 1 screenshot image proof is strictly required for bug reports.';
+        newErrors.file = 'At least 1 screenshot image proof is required for bug reports.';
       }
     }
 
@@ -134,7 +131,6 @@ export function QACommentForm({
     setLoading(true);
     setErrors({});
 
-    // Prepend target element tag for clarity if available
     const finalNotes = targetElement.trim()
       ? `[Target Element: ${targetElement.trim()}]\n${qaNotes.trim()}`
       : qaNotes.trim();
@@ -165,7 +161,6 @@ export function QACommentForm({
         const createdComment = await res.json();
         onCommentSubmitted(createdComment);
 
-        // Reset Form
         setTargetElement('');
         setQaNotes('');
         setPageTested('');
@@ -184,7 +179,7 @@ export function QACommentForm({
   };
 
   return (
-    <div className="poke-card p-6 rounded-3xl mb-8 dark:bg-[#0d1117] dark:border-white/10 shadow-sm border border-gray-200">
+    <div className="poke-card p-4 sm:p-6 rounded-3xl mb-8 dark:bg-[#0d1117] dark:border-white/10 shadow-sm border border-gray-200">
       <div className="mb-4">
         <h3 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
           Leave QA Inspection Report
@@ -202,16 +197,16 @@ export function QACommentForm({
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Type Selector Pills */}
+        {/* Feedback type classification */}
         <div>
           <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5">
             Feedback Type Classification
           </label>
-          <div className="grid grid-cols-3 gap-2 bg-gray-100 dark:bg-[#161b22] p-1 rounded-2xl border border-gray-200 dark:border-white/10">
+          <div className="flex flex-col sm:flex-row gap-2 bg-gray-100 dark:bg-[#161b22] p-1 rounded-2xl border border-gray-200 dark:border-white/10">
             <button
               type="button"
               onClick={() => setType('BUG')}
-              className={`py-2 rounded-xl text-xs font-extrabold transition-all ${
+              className={`flex-1 py-2 rounded-xl text-xs font-extrabold transition-all text-center ${
                 type === 'BUG'
                   ? 'bg-rose-600 text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
@@ -222,7 +217,7 @@ export function QACommentForm({
             <button
               type="button"
               onClick={() => setType('FEATURE')}
-              className={`py-2 rounded-xl text-xs font-extrabold transition-all ${
+              className={`flex-1 py-2 rounded-xl text-xs font-extrabold transition-all text-center ${
                 type === 'FEATURE'
                   ? 'bg-amber-500 text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
@@ -233,7 +228,7 @@ export function QACommentForm({
             <button
               type="button"
               onClick={() => setType('GENERAL')}
-              className={`py-2 rounded-xl text-xs font-extrabold transition-all ${
+              className={`flex-1 py-2 rounded-xl text-xs font-extrabold transition-all text-center ${
                 type === 'GENERAL'
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
@@ -244,19 +239,19 @@ export function QACommentForm({
           </div>
         </div>
 
-        {/* Page Tested Route & Target Element */}
+        {/* Page route and element target */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-between">
               <span>Page Tested Route {type === 'BUG' ? <span className="text-rose-500 font-bold ml-0.5">*</span> : <span className="text-gray-400 font-normal">(Optional)</span>}</span>
-              {type === 'BUG' && <span className="text-[10px] text-rose-500 font-extrabold">Required for Bug</span>}
+              {type === 'BUG' && <span className="text-[10px] text-rose-500 font-extrabold">Required</span>}
             </label>
             <input
               type="text"
               value={pageTested}
               onBlur={() => setTouched((prev) => ({ ...prev, pageTested: true }))}
               onChange={(e) => setPageTested(e.target.value)}
-              placeholder="e.g. /checkout (Required)"
+              placeholder="e.g. /checkout"
               className={`w-full bg-white dark:bg-[#161b22] border rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder-gray-400 outline-none transition-colors ${
                 touched.pageTested && errors.pageTested
                   ? 'border-rose-500 ring-2 ring-rose-500/20'
@@ -271,14 +266,14 @@ export function QACommentForm({
           <div>
             <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-between">
               <span>Specific Element / Button Area {type === 'BUG' ? <span className="text-rose-500 font-bold ml-0.5">*</span> : <span className="text-gray-400 font-normal">(Optional)</span>}</span>
-              {type === 'BUG' && <span className="text-[10px] text-rose-500 font-extrabold">Required for Bug</span>}
+              {type === 'BUG' && <span className="text-[10px] text-rose-500 font-extrabold">Required</span>}
             </label>
             <input
               type="text"
               value={targetElement}
               onBlur={() => setTouched((prev) => ({ ...prev, targetElement: true }))}
               onChange={(e) => setTargetElement(e.target.value)}
-              placeholder='e.g. "Navbar Login Button" or "Hero CTA"'
+              placeholder='e.g. Navbar Login Button'
               className={`w-full bg-white dark:bg-[#161b22] border rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder-gray-400 outline-none transition-colors ${
                 touched.targetElement && errors.targetElement
                   ? 'border-rose-500 ring-2 ring-rose-500/20'
@@ -301,7 +296,7 @@ export function QACommentForm({
             value={qaNotes}
             onBlur={() => setTouched((prev) => ({ ...prev, notes: true }))}
             onChange={(e) => setQaNotes(e.target.value)}
-            placeholder="Describe exact issue, step-by-step reproduction (e.g. 1. Clicked submit 2. Received 404), expected result vs actual result..."
+            placeholder="Describe exact issue, step-by-step reproduction steps, expected result vs actual result..."
             className={`w-full bg-white dark:bg-[#161b22] border rounded-2xl p-3 text-xs text-slate-900 dark:text-white placeholder-gray-400 outline-none transition-colors ${
               touched.notes && errors.notes
                 ? 'border-rose-500 ring-2 ring-rose-500/20'
@@ -313,7 +308,7 @@ export function QACommentForm({
           )}
         </div>
 
-        {/* Multiple Screenshots Attachment Section */}
+        {/* Screenshots Upload */}
         <div>
           <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-between">
             <span className="flex items-center gap-1.5">
@@ -322,11 +317,11 @@ export function QACommentForm({
                 Screenshot Proof Attachments {type === 'BUG' ? <span className="text-rose-500 font-bold ml-0.5">*</span> : <span className="text-gray-400 font-normal">(Optional)</span>} ({screenshots.length}/5)
               </span>
             </span>
-            {type === 'BUG' && <span className="text-[10px] text-rose-500 font-extrabold">Required for Bug Reports</span>}
+            {type === 'BUG' && <span className="text-[10px] text-rose-500 font-extrabold">Required</span>}
           </label>
 
           {screenshots.length > 0 && (
-            <div className="grid grid-cols-5 gap-2 mb-2">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-2">
               {screenshots.map((img, idx) => (
                 <div key={idx} className="relative group aspect-video rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5">
                   <img src={img} alt={`Proof ${idx + 1}`} className="w-full h-full object-cover" />
@@ -364,14 +359,14 @@ export function QACommentForm({
           )}
         </div>
 
-        {/* Auto Metadata Summary Bar */}
+        {/* Auto metadata bar */}
         <div className="p-3 rounded-xl bg-gray-50 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 flex items-center justify-between text-[10px] text-gray-500 dark:text-gray-400 flex-wrap gap-2">
           <span>OS: <strong className="text-slate-800 dark:text-gray-200">{specs.os || 'Windows'}</strong></span>
           <span>Browser: <strong className="text-slate-800 dark:text-gray-200">{specs.browser || 'Firefox'}</strong></span>
           <span>Res: <strong className="text-slate-800 dark:text-gray-200">{specs.screenResolution || '1920 x 1080'}</strong></span>
         </div>
 
-        {/* Submit CTA */}
+        {/* Submit button */}
         <button
           type="submit"
           disabled={loading}
@@ -384,3 +379,4 @@ export function QACommentForm({
     </div>
   );
 }
+

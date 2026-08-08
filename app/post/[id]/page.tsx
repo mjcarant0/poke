@@ -21,7 +21,6 @@ function PostDetailPageContent({ postId }: { postId: string }) {
     async function loadPostData() {
       setLoading(true);
       try {
-        // Fetch current user session
         const meRes = await fetch('/api/auth/me');
         if (meRes.ok) {
           const authData = await meRes.json();
@@ -76,7 +75,7 @@ function PostDetailPageContent({ postId }: { postId: string }) {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-[#f4f4f6] dark:bg-[#090d16] text-slate-900 dark:text-gray-100 flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-[#f4f4f6] dark:bg-[#090d16] text-slate-900 dark:text-gray-100 flex flex-col items-center justify-center p-6 text-center">
         <h2 className="text-xl font-extrabold mb-2">Project Post Not Found</h2>
         <p className="text-xs text-gray-500 mb-6">The requested post does not exist or has been deleted.</p>
         <Link
@@ -96,12 +95,12 @@ function PostDetailPageContent({ postId }: { postId: string }) {
       (post.author?.username && post.author.username.toLowerCase() === currentUser.username?.toLowerCase()));
 
   return (
-    <div className="min-h-screen bg-[#f4f4f6] dark:bg-[#090d16] text-slate-900 dark:text-gray-100 flex flex-col transition-colors">
+    <div className="min-h-screen bg-[#f4f4f6] dark:bg-[#090d16] text-slate-900 dark:text-gray-100 flex flex-col transition-colors overflow-x-hidden">
       {/* Top Navbar */}
       <Navbar />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-8">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Back Link */}
         <Link
           href="/feed"
@@ -111,14 +110,14 @@ function PostDetailPageContent({ postId }: { postId: string }) {
           <span>Back to Reviewer Feed</span>
         </Link>
 
-        {/* Selected Post Detail Card */}
-        <div className="mb-8">
+        {/* Post Detail Card */}
+        <div className="mb-6 sm:mb-8">
           <PostCard post={post} />
         </div>
 
-        {/* Hide QACommentForm if logged in user is the post author */}
+        {/* Comment form or developer workspace banner */}
         {isAuthor ? (
-          <div className="poke-card p-6 rounded-3xl mb-8 dark:bg-[#0d1117] dark:border-white/10 flex items-center gap-3 border border-gray-200">
+          <div className="poke-card p-5 sm:p-6 rounded-3xl mb-8 dark:bg-[#0d1117] dark:border-white/10 flex items-center gap-3 border border-gray-200">
             <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center flex-shrink-0">
               <Code2 className="w-5 h-5" />
             </div>
@@ -137,7 +136,7 @@ function PostDetailPageContent({ postId }: { postId: string }) {
 
         {/* QA Reports Thread Header */}
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+          <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
             QA Reports & Discussion Thread ({comments.length})
           </h3>
         </div>
@@ -150,7 +149,7 @@ function PostDetailPageContent({ postId }: { postId: string }) {
         />
       </main>
 
-      {/* Repeatable Footer Component */}
+      {/* Footer Component */}
       <Footer />
     </div>
   );
@@ -170,3 +169,4 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
     </Suspense>
   );
 }
+

@@ -5,7 +5,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 
 export async function GET() {
   try {
-    const posts = await prisma.projectPost.findMany({
+    let posts = await prisma.projectPost.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
         author: {
@@ -18,7 +18,36 @@ export async function GET() {
     });
 
     if (!posts || posts.length === 0) {
-      return NextResponse.json(MOCK_POSTS);
+      for (const mock of MOCK_POSTS) {
+        try {
+          await prisma.projectPost.create({
+            data: {
+              id: mock.id,
+              title: mock.title,
+              description: mock.description,
+              url: mock.url,
+              category: mock.category || 'SaaS',
+              authorEmail: mock.authorEmail || 'dev@poke-app.dev',
+              images: mock.images ? JSON.stringify(mock.images) : null,
+              upvotes: mock.upvotes || 0,
+            },
+          });
+        } catch (seedErr) {
+          // Ignore duplicate seed error
+        }
+      }
+
+      posts = await prisma.projectPost.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: {
+          author: {
+            select: { name: true, username: true, email: true },
+          },
+          _count: {
+            select: { comments: true },
+          },
+        },
+      });
     }
 
     const formatted = posts.map((p) => {
@@ -52,52 +81,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Post title and live application URL are required' }, { status: 400 });
     }
 
-    // Check current authenticated user session
     const currentUser = await getAuthenticatedUser();
+
+    let formattedUrl = url.trim();
+    if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
 
     const imagesJson = Array.isArray(images) && images.length > 0 ? JSON.stringify(images) : null;
 
-    try {
-      const newPost = await prisma.projectPost.create({
-        data: {
-          title,
-          description,
-          url,
-          category,
-          images: imagesJson,
-          authorEmail: currentUser?.email || authorEmail,
-          authorId: currentUser?.userId || null,
-          upvotes: 0,
+    const newPost = await prisma.projectPost.create({
+      data: {
+        title: title.trim(),
+        description: description.trim(),
+        url: formattedUrl,
+        category,
+        images: imagesJson,
+        authorEmail: currentUser?.email || authorEmail,
+        authorId: currentUser?.userId || null,
+        upvotes: 0,
+      },
+      include: {
+        author: {
+          select: { name: true, username: true, email: true },
         },
-        include: {
-          author: {
-            select: { name: true, username: true, email: true },
-          },
-        },
-      });
+      },
+    });
 
-      return NextResponse.json({
+    return NextResponse.json(
+      {
         ...newPost,
         images: images,
-      }, { status: 201 });
-    } catch (dbErr) {
-      const fallbackPost = {
-        id: 'post_' + Date.now(),
-        title,
-        description,
-        url,
-        category,
-        images: images,
-        authorEmail: currentUser?.email || authorEmail,
-        author: currentUser ? { name: currentUser.username, username: currentUser.username } : null,
-        upvotes: 0,
-        createdAt: new Date().toISOString(),
         commentsCount: 0,
-      };
-      MOCK_POSTS.unshift(fallbackPost as any);
-      return NextResponse.json(fallbackPost, { status: 201 });
-    }
+      },
+      { status: 201 }
+    );
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
   }
 }
+

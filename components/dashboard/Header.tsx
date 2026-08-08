@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Target, Code2, Plus, Globe, ExternalLink, ChevronDown } from 'lucide-react';
+import { Code2, Globe, ExternalLink, ChevronDown } from 'lucide-react';
 import { Project } from '@/types';
 
 interface HeaderProps {
@@ -21,11 +21,11 @@ export function Header({
   const [showProjectDropdown, setShowProjectDropdown] = useState(false);
 
   return (
-    <header className="w-full bg-[#090d16] border-b border-white/10 px-6 py-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <header className="w-full bg-[#090d16] border-b border-white/10 px-4 sm:px-6 py-3.5">
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {/* Brand & Project Selector */}
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2">
+        <div className="flex items-center justify-between sm:justify-start gap-4">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 rounded-xl bg-white text-black flex items-center justify-center font-black text-sm">
               P
             </div>
@@ -40,13 +40,13 @@ export function Header({
               onClick={() => setShowProjectDropdown(!showProjectDropdown)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-gray-200 transition-colors"
             >
-              <span>{currentProject.title}</span>
-              <span className="text-[11px] text-gray-500 font-normal">({currentProject.category})</span>
+              <span className="truncate max-w-[120px] sm:max-w-none">{currentProject.title}</span>
+              <span className="text-[11px] text-gray-500 font-normal hidden sm:inline">({currentProject.category})</span>
               <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
             </button>
 
             {showProjectDropdown && (
-              <div className="absolute left-0 mt-2 w-56 bg-[#0d1117] rounded-xl p-2 z-50 shadow-2xl border border-white/15">
+              <div className="absolute right-0 sm:left-0 mt-2 w-56 bg-[#0d1117] rounded-xl p-2 z-50 shadow-2xl border border-white/15">
                 <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                   Active Project
                 </div>
@@ -60,7 +60,7 @@ export function Header({
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button
             onClick={onToggleDemoMode}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
@@ -69,7 +69,7 @@ export function Header({
                 : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
             }`}
           >
-            {isDemoMode ? 'Demo Mode Active' : 'Enable Demo Data'}
+            {isDemoMode ? 'Demo Active' : 'Enable Demo'}
           </button>
 
           <Link
@@ -84,7 +84,7 @@ export function Header({
 
           <button
             onClick={onOpenEmbedModal}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-white hover:bg-gray-200 text-black font-extrabold text-xs transition-all shadow-sm"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-200 text-black font-extrabold text-xs transition-all shadow-sm"
           >
             <Code2 className="w-4 h-4" />
             <span>Embed Widget</span>
@@ -94,3 +94,4 @@ export function Header({
     </header>
   );
 }
+

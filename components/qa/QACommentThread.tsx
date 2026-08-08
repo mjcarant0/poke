@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { QAComment, FeedbackStatus, QAReply } from '@/types';
-import { Monitor, Globe, Clock, ChevronDown, CheckCircle2, AlertCircle, Sparkles, MessageSquare, Reply, CornerDownRight, Send, User, XCircle, ImageIcon } from 'lucide-react';
+import { Monitor, Globe, Clock, ChevronDown, CheckCircle2, AlertCircle, Sparkles, MessageSquare, Reply, CornerDownRight, Send, XCircle, ImageIcon } from 'lucide-react';
 
 interface QACommentThreadProps {
   comments: QAComment[];
@@ -27,7 +27,7 @@ export function QACommentThread({
 
   if (comments.length === 0) {
     return (
-      <div className="poke-card p-10 text-center rounded-3xl dark:bg-[#0d1117] dark:border-white/10">
+      <div className="poke-card p-8 sm:p-10 text-center rounded-3xl dark:bg-[#0d1117] dark:border-white/10">
         <p className="text-xs font-bold text-gray-500 dark:text-gray-400">
           No QA reports submitted yet. Be the first reviewer to leave feedback!
         </p>
@@ -129,7 +129,7 @@ export function QACommentThread({
         setActiveReplyId(null);
       }
     } catch (err) {
-      // Ignore
+      // Ignore reply post errors
     } finally {
       setSubmittingReply(false);
     }
@@ -150,21 +150,21 @@ export function QACommentThread({
         return (
           <div
             key={comment.id}
-            className="poke-card p-5 rounded-3xl dark:bg-[#0d1117] dark:border-white/10 border border-gray-200 shadow-sm transition-all"
+            className="poke-card p-4 sm:p-5 rounded-3xl dark:bg-[#0d1117] dark:border-white/10 border border-gray-200 shadow-sm transition-all"
           >
             {/* Header Row */}
             <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {getTypeBadge(comment.type)}
 
                 {comment.pageTested && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gray-100 dark:bg-white/10 text-slate-800 dark:text-gray-200">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gray-100 dark:bg-white/10 text-slate-800 dark:text-gray-200 truncate max-w-[200px]">
                     Route: {comment.pageTested}
                   </span>
                 )}
               </div>
 
-              {/* Status Dropdown / Badge */}
+              {/* Status Dropdown or Badge */}
               {isDeveloperView && onStatusChange ? (
                 <div className="relative">
                   <select
@@ -190,7 +190,7 @@ export function QACommentThread({
               {comment.qaNotes}
             </p>
 
-            {/* Multiple Screenshots Preview */}
+            {/* Screenshots Preview */}
             {screenshotsList.length > 0 && (
               <div className="mb-4">
                 <div className="flex items-center gap-1.5 mb-1.5 text-[10px] font-bold text-gray-500 dark:text-gray-400">
@@ -203,7 +203,7 @@ export function QACommentThread({
                       key={idx}
                       type="button"
                       onClick={() => setSelectedImage(img)}
-                      className="flex-shrink-0 w-32 h-20 rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:scale-105 transition-transform"
+                      className="flex-shrink-0 w-28 h-16 sm:w-32 sm:h-20 rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:scale-105 transition-transform"
                     >
                       <img src={img} alt={`Proof ${idx + 1}`} className="w-full h-full object-cover" />
                     </button>
@@ -212,7 +212,7 @@ export function QACommentThread({
               </div>
             )}
 
-            {/* Auto-Captured Technical Context Footer & Reply Trigger */}
+            {/* Technical Context Bar */}
             <div className="bg-gray-50 dark:bg-[#161b22] p-3 rounded-2xl border border-gray-200/80 dark:border-white/10 text-[10px] text-gray-500 dark:text-gray-400 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
                 <div className="flex items-center gap-1 truncate">
@@ -231,7 +231,7 @@ export function QACommentThread({
                 </div>
               </div>
 
-              {/* Reply Button Trigger */}
+              {/* Reply Trigger */}
               <button
                 onClick={() => {
                   setActiveReplyId(activeReplyId === comment.id ? null : comment.id);
@@ -244,7 +244,7 @@ export function QACommentThread({
               </button>
             </div>
 
-            {/* Sub-thread Replies List */}
+            {/* Replies List */}
             {allReplies.length > 0 && (
               <div className="pl-3 border-l-2 border-gray-200 dark:border-white/10 space-y-2 mt-3 mb-3">
                 {allReplies.map((r, idx) => (
@@ -275,7 +275,7 @@ export function QACommentThread({
               </div>
             )}
 
-            {/* Inline Reply Input Box */}
+            {/* Reply Input Box */}
             {activeReplyId === comment.id && (
               <div className="mt-3 p-3 rounded-2xl bg-gray-50 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 animate-fadeIn">
                 {!isDeveloperView && (
@@ -287,13 +287,13 @@ export function QACommentThread({
                     className="w-full bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white mb-2 outline-none"
                   />
                 )}
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <input
                     type="text"
                     placeholder={
                       isDeveloperView
-                        ? 'Reply to this inspection report as Developer...'
-                        : 'Reply to this inspection report...'
+                        ? 'Reply to this report as Developer...'
+                        : 'Reply to this report...'
                     }
                     value={replyInput}
                     onChange={(e) => setReplyInput(e.target.value)}
@@ -305,7 +305,7 @@ export function QACommentThread({
                   <button
                     onClick={() => handlePostReply(comment.id)}
                     disabled={submittingReply || !replyInput.trim()}
-                    className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-xs flex items-center gap-1.5 transition-all shadow-sm disabled:opacity-50"
+                    className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm disabled:opacity-50"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Send</span>
@@ -317,7 +317,7 @@ export function QACommentThread({
         );
       })}
 
-      {/* Image Modal Lightbox */}
+      {/* Image Lightbox */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
@@ -332,3 +332,4 @@ export function QACommentThread({
     </div>
   );
 }
+

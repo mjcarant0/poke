@@ -16,7 +16,6 @@ export function AuthModal({
 }: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
 
-  // Form Fields
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const [emailOrUsername, setEmailOrUsername] = useState('');
@@ -24,26 +23,21 @@ export function AuthModal({
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Password Visibility Toggles
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Touched state
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  // Loading & Error States
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isEmailValid = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
 
-  // Clear errors when user types
   const handleInputChange = (setter: React.Dispatch<React.SetStateAction<string>>, value: string) => {
     setter(value);
     if (error) setError(null);
   };
 
-  // Validation checks
   const getFieldErrors = () => {
     const errs: Record<string, string> = {};
     if (mode === 'login') {
@@ -63,7 +57,6 @@ export function AuthModal({
         errs.password = 'Password must be at least 6 characters.';
       }
 
-      // Confirm password match check
       if (!confirmPassword) {
         errs.confirmPassword = 'Please re-enter your password.';
       } else if (password.trim() !== confirmPassword.trim()) {
@@ -136,10 +129,10 @@ export function AuthModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-      <div className="w-full max-w-md bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl text-slate-900 dark:text-gray-100 transition-colors">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fadeIn overflow-y-auto">
+      <div className="w-full max-w-md bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-3xl p-4 sm:p-6 shadow-2xl text-slate-900 dark:text-gray-100 transition-colors my-auto max-h-[90vh] overflow-y-auto">
         {/* Header with Mode Switch Tabs */}
-        <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-white/10 mb-6">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-gray-100 dark:border-white/10 mb-4 sm:mb-6">
           <div className="flex items-center gap-1 bg-gray-100 dark:bg-[#161b22] p-1 rounded-full border border-gray-200 dark:border-white/10">
             <button
               onClick={() => {
@@ -147,7 +140,7 @@ export function AuthModal({
                 setError(null);
                 setTouched({});
               }}
-              className={`px-4 py-1.5 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 ${
                 mode === 'login'
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
@@ -163,7 +156,7 @@ export function AuthModal({
                 setError(null);
                 setTouched({});
               }}
-              className={`px-4 py-1.5 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 ${
                 mode === 'register'
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
@@ -267,7 +260,7 @@ export function AuthModal({
                 )}
               </div>
 
-              {/* Password with Show/Hide Toggle */}
+              {/* Password */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
                   Password <span className="text-rose-500 font-bold ml-0.5">*</span>
@@ -301,7 +294,7 @@ export function AuthModal({
                 )}
               </div>
 
-              {/* Re-enter Password with Show/Hide Toggle */}
+              {/* Confirm Password */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
                   Re-enter Password <span className="text-rose-500 font-bold ml-0.5">*</span>
@@ -337,7 +330,7 @@ export function AuthModal({
             </>
           ) : (
             <>
-              {/* Email OR Username */}
+              {/* Email or Username */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
                   Email Address OR Username <span className="text-rose-500 font-bold ml-0.5">*</span>
@@ -362,7 +355,7 @@ export function AuthModal({
                 )}
               </div>
 
-              {/* Password with Show/Hide Toggle */}
+              {/* Password */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
                   Password <span className="text-rose-500 font-bold ml-0.5">*</span>
@@ -420,3 +413,4 @@ export function AuthModal({
     </div>
   );
 }
+

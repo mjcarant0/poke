@@ -13,7 +13,6 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Extract clean developer name from author or author email
   const developerName =
     post.author?.name ||
     post.author?.username ||
@@ -21,7 +20,6 @@ export function PostCard({ post }: PostCardProps) {
       ? post.authorEmail.split('@')[0]
       : post.authorEmail || 'Developer');
 
-  // Format relative timestamp
   const getRelativeTime = (dateVal: string | Date) => {
     try {
       const timestamp = typeof dateVal === 'string' ? new Date(dateVal).getTime() : dateVal.getTime();
@@ -39,7 +37,7 @@ export function PostCard({ post }: PostCardProps) {
   const imagesList = post.images || [];
 
   return (
-    <div className="poke-card p-5 rounded-3xl dark:bg-[#0d1117] dark:border-white/10 shadow-sm transition-all hover:shadow-md border border-gray-200">
+    <div className="poke-card p-4 sm:p-5 rounded-3xl dark:bg-[#0d1117] dark:border-white/10 shadow-sm transition-all hover:shadow-md border border-gray-200">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         {/* Main Post Details */}
         <div className="flex-1 min-w-0">
@@ -56,7 +54,7 @@ export function PostCard({ post }: PostCardProps) {
 
           {/* Post Title */}
           <Link href={`/post/${post.id}`} className="block group">
-            <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight group-hover:underline mb-1">
+            <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight group-hover:underline mb-1">
               {post.title}
             </h3>
           </Link>
@@ -66,7 +64,7 @@ export function PostCard({ post }: PostCardProps) {
             {post.description}
           </p>
 
-          {/* Developer Attached Screenshots Grid */}
+          {/* Screenshot thumbnails */}
           {imagesList.length > 0 && (
             <div className="mb-4">
               <div className="flex items-center gap-1.5 mb-2 text-[11px] font-bold text-gray-500 dark:text-gray-400">
@@ -79,7 +77,7 @@ export function PostCard({ post }: PostCardProps) {
                     key={idx}
                     type="button"
                     onClick={() => setSelectedImage(img)}
-                    className="flex-shrink-0 w-28 h-20 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:scale-105 transition-transform"
+                    className="flex-shrink-0 w-24 h-16 sm:w-28 sm:h-20 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:scale-105 transition-transform"
                   >
                     <img src={img} alt={`${post.title} screenshot ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
@@ -89,12 +87,12 @@ export function PostCard({ post }: PostCardProps) {
           )}
 
           {/* Action Links */}
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <a
               href={post.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 text-xs font-extrabold shadow-sm transition-all"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 text-xs font-extrabold shadow-sm transition-all"
             >
               <Globe className="w-3.5 h-3.5" />
               <span>Test Live App</span>
@@ -103,7 +101,7 @@ export function PostCard({ post }: PostCardProps) {
 
             <Link
               href={`/post/${post.id}`}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white text-xs font-extrabold transition-colors border border-gray-200 dark:border-white/10"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white text-xs font-extrabold transition-colors border border-gray-200 dark:border-white/10"
             >
               <MessageSquareText className="w-3.5 h-3.5" />
               <span>{post.commentsCount || 0} QA Reports & Comments</span>
@@ -112,7 +110,7 @@ export function PostCard({ post }: PostCardProps) {
         </div>
       </div>
 
-      {/* Image Modal Lightbox */}
+      {/* Image Lightbox */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
@@ -127,3 +125,4 @@ export function PostCard({ post }: PostCardProps) {
     </div>
   );
 }
+

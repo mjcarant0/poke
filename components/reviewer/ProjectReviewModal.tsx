@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, ExternalLink, Send, Bug, Lightbulb, MessageSquare, Laptop, Globe, Shield } from 'lucide-react';
+import { X, ExternalLink, Send, Bug, Lightbulb, MessageSquare, Globe, Shield } from 'lucide-react';
 import { Project, FeedbackType } from '@/types';
 import { parseUserAgent } from '@/lib/user-agent';
 
@@ -36,7 +36,6 @@ export function ProjectReviewModal({
     setSubmitting(true);
     setStatusMsg(null);
 
-    // Auto-capture client environmental metadata
     const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
     const parsedUA = parseUserAgent(ua);
     const screenRes = typeof window !== 'undefined' ? `${window.screen.width} x ${window.screen.height}` : '1920 x 1080';
@@ -65,7 +64,7 @@ export function ProjectReviewModal({
       });
 
       if (res.ok) {
-        setStatusMsg({ text: '✓ Poke submitted successfully!', error: false });
+        setStatusMsg({ text: 'Poke submitted successfully!', error: false });
         setTitle('');
         setDescription('');
         setScreenshotUrl('');
@@ -85,29 +84,29 @@ export function ProjectReviewModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-      <div className="w-full max-w-2xl bg-[#0d1117] border border-white/10 rounded-2xl p-6 text-gray-100 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fadeIn overflow-y-auto">
+      <div className="w-full max-w-2xl bg-[#0d1117] border border-white/10 rounded-3xl p-4 sm:p-6 text-gray-100 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-5">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-white/10 mb-4 sm:mb-5">
+          <div className="flex-1 min-w-0 pr-2">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/10 text-gray-300 border border-white/15 uppercase">
                 {project.category}
               </span>
-              <span className="text-xs text-gray-500 font-mono">By {project.ownerEmail}</span>
+              <span className="text-xs text-gray-500 font-mono truncate">By {project.ownerEmail}</span>
             </div>
-            <h2 className="text-xl font-extrabold text-white">{project.title}</h2>
+            <h2 className="text-lg sm:text-xl font-extrabold text-white truncate">{project.title}</h2>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white"
+            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Project Details & Live App Link */}
+        {/* Project Details */}
         <div className="glass-panel p-4 rounded-xl mb-6">
           <p className="text-xs text-gray-300 leading-relaxed mb-3">
             {project.description}
@@ -117,7 +116,7 @@ export function ProjectReviewModal({
             href={project.url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-black font-extrabold text-xs shadow-sm hover:bg-gray-200 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black font-extrabold text-xs shadow-sm hover:bg-gray-200 transition-all"
           >
             <Globe className="w-4 h-4" />
             <span>Open & Test Live Application</span>
@@ -125,18 +124,18 @@ export function ProjectReviewModal({
           </a>
         </div>
 
-        {/* Poke Feedback Form */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-            <span>Submit a Poke (Structured Review)</span>
+          <h3 className="text-sm font-extrabold text-white">
+            Submit a Poke (Structured Review)
           </h3>
 
           {/* Classification tabs */}
-          <div className="flex items-center gap-2 p-1 bg-[#161b22] border border-white/10 rounded-xl">
+          <div className="flex flex-col sm:flex-row items-stretch gap-1.5 p-1 bg-[#161b22] border border-white/10 rounded-2xl sm:rounded-xl">
             <button
               type="button"
               onClick={() => setType('BUG')}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
+              className={`flex-1 py-2 rounded-xl sm:rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
                 type === 'BUG' ? 'bg-rose-500 text-white' : 'text-gray-400 hover:text-white'
               }`}
             >
@@ -146,7 +145,7 @@ export function ProjectReviewModal({
             <button
               type="button"
               onClick={() => setType('FEATURE')}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
+              className={`flex-1 py-2 rounded-xl sm:rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
                 type === 'FEATURE' ? 'bg-amber-500 text-black font-bold' : 'text-gray-400 hover:text-white'
               }`}
             >
@@ -156,7 +155,7 @@ export function ProjectReviewModal({
             <button
               type="button"
               onClick={() => setType('GENERAL')}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
+              className={`flex-1 py-2 rounded-xl sm:rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
                 type === 'GENERAL' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'
               }`}
             >
@@ -189,7 +188,7 @@ export function ProjectReviewModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Provide exact steps to reproduce or details on your suggestion..."
-              className="w-full bg-[#161b22] border border-white/10 rounded-xl p-3 text-xs text-white placeholder-gray-500 outline-none focus:border-white transition-colors"
+              className="w-full bg-[#161b22] border border-white/10 rounded-2xl p-3 text-xs text-white placeholder-gray-500 outline-none focus:border-white transition-colors"
             />
           </div>
 
@@ -221,8 +220,8 @@ export function ProjectReviewModal({
             </div>
           </div>
 
-          {/* Auto Technical Context Callout */}
-          <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between text-[11px] text-gray-400">
+          {/* Technical Specs Callout */}
+          <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-gray-400 gap-1">
             <span className="flex items-center gap-1.5 font-medium">
               <Shield className="w-3.5 h-3.5 text-gray-400" />
               Auto Technical Specs Attached
@@ -241,7 +240,7 @@ export function ProjectReviewModal({
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 rounded-xl bg-white hover:bg-gray-200 text-black font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
+            className="w-full py-3 rounded-full bg-white hover:bg-gray-200 text-black font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
           >
             <Send className="w-4 h-4" />
             <span>{submitting ? 'Sending Poke...' : 'Submit Poke Feedback'}</span>
@@ -251,3 +250,4 @@ export function ProjectReviewModal({
     </div>
   );
 }
+

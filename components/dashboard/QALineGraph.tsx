@@ -24,7 +24,6 @@ export function QALineGraph({ comments }: QALineGraphProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>('THIS_MONTH');
   const [visibleSeries, setVisibleSeries] = useState<VisibleSeries>('ALL');
 
-  // Custom date picker range
   const todayStr = new Date().toISOString().split('T')[0];
   const weekAgoStr = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const [startDate, setStartDate] = useState<string>(weekAgoStr);
@@ -37,7 +36,6 @@ export function QALineGraph({ comments }: QALineGraphProps) {
     bucket: DataBucket;
   } | null>(null);
 
-  // Compute intervals based on time range
   const buckets = useMemo<DataBucket[]>(() => {
     const now = new Date();
     const result: DataBucket[] = [];
@@ -100,7 +98,6 @@ export function QALineGraph({ comments }: QALineGraphProps) {
       }
     }
 
-    // Populate category counts
     comments.forEach((c) => {
       const cDate = new Date(c.createdAt || Date.now());
       const bucket = result.find((b) => cDate >= b.startDate && cDate < b.endDate);
@@ -116,7 +113,6 @@ export function QALineGraph({ comments }: QALineGraphProps) {
     return result;
   }, [comments, timeRange, startDate, endDate]);
 
-  // Overall category totals
   const totals = useMemo(() => {
     return {
       bugs: buckets.reduce((acc, b) => acc + b.bugs, 0),
@@ -125,7 +121,6 @@ export function QALineGraph({ comments }: QALineGraphProps) {
     };
   }, [buckets]);
 
-  // SVG dimensions
   const width = 700;
   const height = 240;
   const paddingX = 45;
@@ -134,7 +129,6 @@ export function QALineGraph({ comments }: QALineGraphProps) {
   const chartWidth = width - paddingX * 2;
   const chartHeight = height - paddingY * 2;
 
-  // Max Y value across categories
   const maxY = useMemo(() => {
     let max = 1;
     buckets.forEach((b) => {
@@ -143,7 +137,6 @@ export function QALineGraph({ comments }: QALineGraphProps) {
     return Math.ceil(max * 1.25);
   }, [buckets]);
 
-  // Coordinate generator helper
   const getCoordinates = (getter: (b: DataBucket) => number) => {
     return buckets.map((b, i) => {
       const x = paddingX + (i / Math.max(1, buckets.length - 1)) * chartWidth;
@@ -157,7 +150,6 @@ export function QALineGraph({ comments }: QALineGraphProps) {
   const featurePoints = getCoordinates((b) => b.features);
   const generalPoints = getCoordinates((b) => b.general);
 
-  // SVG smooth curve generator
   const createCurvedPath = (pts: { x: number; y: number }[]) => {
     if (pts.length === 0) return '';
     if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
@@ -176,15 +168,15 @@ export function QALineGraph({ comments }: QALineGraphProps) {
   };
 
   return (
-    <div className="poke-card p-6 rounded-3xl mb-8 dark:bg-[#0d1117] dark:border-white/10 shadow-sm">
-      {/* Header Bar with Time Range & Series Selection */}
+    <div className="poke-card p-4 sm:p-6 rounded-3xl mb-8 dark:bg-[#0d1117] dark:border-white/10 shadow-sm">
+      {/* Header bar and controls */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-100 dark:border-white/5">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center shadow-sm">
+          <div className="w-9 h-9 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center shadow-sm shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
               QA Activity Line Graph
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -193,25 +185,24 @@ export function QALineGraph({ comments }: QALineGraphProps) {
           </div>
         </div>
 
-        {/* Filters Controls */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Series Toggle Selector (Bugs, Features, General) */}
-          <div className="flex items-center gap-1 bg-gray-100 dark:bg-[#161b22] p-1 rounded-full text-[11px] font-extrabold border border-gray-200/80 dark:border-white/10">
+        {/* Filter selectors */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-1 bg-gray-100 dark:bg-[#161b22] p-1 rounded-2xl text-[11px] font-extrabold border border-gray-200/80 dark:border-white/10">
             <button
               onClick={() => setVisibleSeries('ALL')}
-              className={`px-3 py-1 rounded-full transition-all flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-xl transition-all flex items-center gap-1 ${
                 visibleSeries === 'ALL'
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <Layers className="w-3 h-3" />
-              <span>All Graphs</span>
+              <span>All</span>
             </button>
 
             <button
               onClick={() => setVisibleSeries('BUG')}
-              className={`px-3 py-1 rounded-full transition-all flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-xl transition-all flex items-center gap-1 ${
                 visibleSeries === 'BUG'
                   ? 'bg-rose-500 text-white shadow-sm'
                   : 'text-rose-600 dark:text-rose-400 hover:opacity-80'
@@ -223,7 +214,7 @@ export function QALineGraph({ comments }: QALineGraphProps) {
 
             <button
               onClick={() => setVisibleSeries('FEATURE')}
-              className={`px-3 py-1 rounded-full transition-all flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-xl transition-all flex items-center gap-1 ${
                 visibleSeries === 'FEATURE'
                   ? 'bg-amber-500 text-white shadow-sm'
                   : 'text-amber-600 dark:text-amber-400 hover:opacity-80'
@@ -235,7 +226,7 @@ export function QALineGraph({ comments }: QALineGraphProps) {
 
             <button
               onClick={() => setVisibleSeries('GENERAL')}
-              className={`px-3 py-1 rounded-full transition-all flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-xl transition-all flex items-center gap-1 ${
                 visibleSeries === 'GENERAL'
                   ? 'bg-blue-500 text-white shadow-sm'
                   : 'text-blue-600 dark:text-blue-400 hover:opacity-80'
@@ -246,8 +237,7 @@ export function QALineGraph({ comments }: QALineGraphProps) {
             </button>
           </div>
 
-          {/* Time Range Selector */}
-          <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-[#161b22] px-3 py-1 rounded-full border border-gray-200 dark:border-white/10 text-xs font-bold text-slate-900 dark:text-white">
+          <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-[#161b22] px-3 py-1 rounded-xl border border-gray-200 dark:border-white/10 text-xs font-bold text-slate-900 dark:text-white">
             <Calendar className="w-3.5 h-3.5 text-gray-400" />
             <select
               value={timeRange}
@@ -264,10 +254,10 @@ export function QALineGraph({ comments }: QALineGraphProps) {
         </div>
       </div>
 
-      {/* Custom Date Range Inputs */}
+      {/* Custom date range selector */}
       {timeRange === 'CUSTOM' && (
-        <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 dark:bg-[#161b22] rounded-2xl border border-gray-200 dark:border-white/10 text-xs font-mono">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4 p-3 bg-gray-50 dark:bg-[#161b22] rounded-2xl border border-gray-200 dark:border-white/10 text-xs font-mono">
+          <div className="flex items-center justify-between sm:justify-start gap-2">
             <span className="text-gray-500 font-bold">Start Date:</span>
             <input
               type="date"
@@ -277,7 +267,7 @@ export function QALineGraph({ comments }: QALineGraphProps) {
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between sm:justify-start gap-2">
             <span className="text-gray-500 font-bold">End Date:</span>
             <input
               type="date"
@@ -289,9 +279,9 @@ export function QALineGraph({ comments }: QALineGraphProps) {
         </div>
       )}
 
-      {/* SVG Line Graph Viewport */}
+      {/* SVG line graph rendering */}
       <div className="relative w-full overflow-x-auto">
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto min-w-[500px] overflow-visible">
           <defs>
             <linearGradient id="bugGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.15" />
@@ -309,7 +299,7 @@ export function QALineGraph({ comments }: QALineGraphProps) {
             </linearGradient>
           </defs>
 
-          {/* Grid Lines */}
+          {/* Grid lines */}
           {[0, 0.25, 0.5, 0.75, 1].map((pct, idx) => {
             const y = paddingY + pct * chartHeight;
             const valLabel = Math.round(maxY * (1 - pct));
@@ -336,7 +326,7 @@ export function QALineGraph({ comments }: QALineGraphProps) {
             );
           })}
 
-          {/* X Axis Labels */}
+          {/* X axis labels */}
           {buckets.map((b, i) => {
             const x = paddingX + (i / Math.max(1, buckets.length - 1)) * chartWidth;
             return (
@@ -352,7 +342,7 @@ export function QALineGraph({ comments }: QALineGraphProps) {
             );
           })}
 
-          {/* 1. Bugs Line (Rose Red) */}
+          {/* Bugs line */}
           {(visibleSeries === 'ALL' || visibleSeries === 'BUG') && (
             <>
               <path
@@ -376,7 +366,7 @@ export function QALineGraph({ comments }: QALineGraphProps) {
             </>
           )}
 
-          {/* 2. Features Line (Amber Orange) */}
+          {/* Features line */}
           {(visibleSeries === 'ALL' || visibleSeries === 'FEATURE') && (
             <>
               <path
@@ -400,7 +390,7 @@ export function QALineGraph({ comments }: QALineGraphProps) {
             </>
           )}
 
-          {/* 3. General Feedback Line (Blue) */}
+          {/* General feedback line */}
           {(visibleSeries === 'ALL' || visibleSeries === 'GENERAL') && (
             <>
               <path
@@ -424,7 +414,7 @@ export function QALineGraph({ comments }: QALineGraphProps) {
             </>
           )}
 
-          {/* Interactive Transparent Hover Overlay Columns */}
+          {/* Transparent interactive hover targets */}
           {buckets.map((bucket, i) => {
             const x = paddingX + (i / Math.max(1, buckets.length - 1)) * chartWidth;
             const colWidth = chartWidth / Math.max(1, buckets.length - 1);
@@ -466,15 +456,15 @@ export function QALineGraph({ comments }: QALineGraphProps) {
               </p>
               <div className="space-y-1 text-[11px]">
                 <div className="flex items-center justify-between gap-3 text-rose-400 dark:text-rose-600">
-                  <span className="flex items-center gap-1 font-bold">● Bugs:</span>
+                  <span className="flex items-center gap-1 font-bold">Bugs:</span>
                   <span>{hoveredPoint.bucket.bugs}</span>
                 </div>
                 <div className="flex items-center justify-between gap-3 text-amber-400 dark:text-amber-600">
-                  <span className="flex items-center gap-1 font-bold">● Features:</span>
+                  <span className="flex items-center gap-1 font-bold">Features:</span>
                   <span>{hoveredPoint.bucket.features}</span>
                 </div>
                 <div className="flex items-center justify-between gap-3 text-blue-400 dark:text-blue-600">
-                  <span className="flex items-center gap-1 font-bold">● General:</span>
+                  <span className="flex items-center gap-1 font-bold">General:</span>
                   <span>{hoveredPoint.bucket.general}</span>
                 </div>
               </div>
@@ -483,8 +473,8 @@ export function QALineGraph({ comments }: QALineGraphProps) {
         )}
       </div>
 
-      {/* Interactive Category Legend Bar */}
-      <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-100 dark:border-white/5 text-xs font-extrabold">
+      {/* Legend Bar */}
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-4 pt-4 border-t border-gray-100 dark:border-white/5 text-xs font-extrabold">
         <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400">
           <span className="w-3 h-3 rounded-full bg-rose-500 inline-block" />
           <span>Bugs ({totals.bugs})</span>
@@ -503,3 +493,4 @@ export function QALineGraph({ comments }: QALineGraphProps) {
     </div>
   );
 }
+
