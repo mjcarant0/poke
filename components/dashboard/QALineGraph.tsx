@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { QAComment } from '@/types';
 import { TrendingUp, Calendar, Bug, Lightbulb, MessageSquare, Layers } from 'lucide-react';
 
-export type TimeRange = 'TODAY' | 'YESTERDAY' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM';
+export type TimeRange = 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'THIS_MONTH' | 'ALL_TIME' | 'CUSTOM';
 export type VisibleSeries = 'ALL' | 'BUG' | 'FEATURE' | 'GENERAL';
 
 interface QALineGraphProps {
@@ -21,7 +21,7 @@ interface DataBucket {
 }
 
 export function QALineGraph({ comments }: QALineGraphProps) {
-  const [timeRange, setTimeRange] = useState<TimeRange>('THIS_MONTH');
+  const [timeRange, setTimeRange] = useState<TimeRange>('TODAY');
   const [visibleSeries, setVisibleSeries] = useState<VisibleSeries>('ALL');
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -57,6 +57,14 @@ export function QALineGraph({ comments }: QALineGraphProps) {
         const label = `${String(hour).padStart(2, '0')}:00`;
         result.push({ label, startDate: bStart, endDate: bEnd, bugs: 0, features: 0, general: 0 });
       }
+    } else if (timeRange === 'THIS_WEEK') {
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 3600000);
+      for (let day = 0; day < 7; day++) {
+        const bStart = new Date(weekAgo.getFullYear(), weekAgo.getMonth(), weekAgo.getDate() + day, 0, 0, 0);
+        const bEnd = new Date(weekAgo.getFullYear(), weekAgo.getMonth(), weekAgo.getDate() + day + 1, 0, 0, 0);
+        const label = bStart.toLocaleDateString('en-US', { weekday: 'short' });
+        result.push({ label, startDate: bStart, endDate: bEnd, bugs: 0, features: 0, general: 0 });
+      }
     } else if (timeRange === 'THIS_MONTH') {
       const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
       const step = Math.max(1, Math.floor(daysInMonth / 6));
@@ -69,17 +77,11 @@ export function QALineGraph({ comments }: QALineGraphProps) {
         const label = `${monthName} ${d}`;
         result.push({ label, startDate: bStart, endDate: bEnd, bugs: 0, features: 0, general: 0 });
       }
-    } else if (timeRange === 'LAST_MONTH') {
-      const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const daysInMonth = new Date(lastMonthDate.getFullYear(), lastMonthDate.getMonth() + 1, 0).getDate();
-      const step = Math.max(1, Math.floor(daysInMonth / 6));
-
-      for (let d = 1; d <= daysInMonth; d += step) {
-        const bStart = new Date(lastMonthDate.getFullYear(), lastMonthDate.getMonth(), d, 0, 0, 0);
-        const nextD = Math.min(daysInMonth + 1, d + step);
-        const bEnd = new Date(lastMonthDate.getFullYear(), lastMonthDate.getMonth(), nextD, 0, 0, 0);
-        const monthName = lastMonthDate.toLocaleString('default', { month: 'short' });
-        const label = `${monthName} ${d}`;
+    } else if (timeRange === 'ALL_TIME') {
+      for (let m = 5; m >= 0; m--) {
+        const bStart = new Date(now.getFullYear(), now.getMonth() - m, 1, 0, 0, 0);
+        const bEnd = new Date(now.getFullYear(), now.getMonth() - m + 1, 1, 0, 0, 0);
+        const label = bStart.toLocaleString('default', { month: 'short' });
         result.push({ label, startDate: bStart, endDate: bEnd, bugs: 0, features: 0, general: 0 });
       }
     } else if (timeRange === 'CUSTOM') {
@@ -244,11 +246,12 @@ export function QALineGraph({ comments }: QALineGraphProps) {
               onChange={(e) => setTimeRange(e.target.value as TimeRange)}
               className="bg-transparent outline-none cursor-pointer text-xs font-bold"
             >
-              <option value="TODAY">Today</option>
-              <option value="YESTERDAY">Yesterday</option>
-              <option value="THIS_MONTH">This Month</option>
-              <option value="LAST_MONTH">Last Month</option>
-              <option value="CUSTOM">Custom Range</option>
+              <option value="TODAY" className="bg-white dark:bg-gray-900 text-slate-900 dark:text-white">Today</option>
+              <option value="YESTERDAY" className="bg-white dark:bg-gray-900 text-slate-900 dark:text-white">Yesterday</option>
+              <option value="THIS_WEEK" className="bg-white dark:bg-gray-900 text-slate-900 dark:text-white">This Week</option>
+              <option value="THIS_MONTH" className="bg-white dark:bg-gray-900 text-slate-900 dark:text-white">This Month</option>
+              <option value="ALL_TIME" className="bg-white dark:bg-gray-900 text-slate-900 dark:text-white">All Time</option>
+              <option value="CUSTOM" className="bg-white dark:bg-gray-900 text-slate-900 dark:text-white">Custom Date</option>
             </select>
           </div>
         </div>

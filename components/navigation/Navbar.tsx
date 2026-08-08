@@ -22,8 +22,19 @@ function NavbarContent({ onOpenCreatePostModal }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const isDark = document.documentElement.classList.contains('dark');
-    setIsDarkMode(isDark);
+    try {
+      const storedTheme = localStorage.getItem('poke_theme');
+      const isDark = storedTheme === 'dark' || (!storedTheme && document.documentElement.classList.contains('dark'));
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        setIsDarkMode(true);
+      } else {
+        document.documentElement.classList.remove('dark');
+        setIsDarkMode(false);
+      }
+    } catch (e) {
+      // Ignore theme read errors
+    }
 
     try {
       const stored = localStorage.getItem('poke_user');
@@ -82,9 +93,11 @@ function NavbarContent({ onOpenCreatePostModal }: NavbarProps) {
 
   const handleLogout = async () => {
     try {
+      const currentTheme = isDarkMode ? 'dark' : 'light';
       await fetch('/api/auth/logout', { method: 'POST' });
       setUser(null);
       localStorage.removeItem('poke_user');
+      localStorage.setItem('poke_theme', currentTheme);
       window.dispatchEvent(new Event('poke_auth_change'));
       window.location.reload();
     } catch (err) {
