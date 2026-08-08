@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { MOCK_POSTS } from '@/lib/mock-data';
 
 export async function GET() {
   try {
@@ -8,20 +7,16 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    if (!posts || posts.length === 0) {
-      return NextResponse.json(MOCK_POSTS);
-    }
-
     return NextResponse.json(posts);
-  } catch (err) {
-    return NextResponse.json(MOCK_POSTS);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Database error' }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, description = '', url, category = 'SaaS', authorEmail = 'dev@poke-app.dev' } = body;
+    const { title, description = '', url, category = 'SaaS App', authorEmail = 'dev@poke-app.dev' } = body;
 
     if (!title || !url) {
       return NextResponse.json({ error: 'Post title and live application URL are required' }, { status: 400 });

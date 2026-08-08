@@ -6,7 +6,6 @@ import { Navbar } from '@/components/navigation/Navbar';
 import { Footer } from '@/components/navigation/Footer';
 import { PostCard } from '@/components/feed/PostCard';
 import { SubmitProjectModal } from '@/components/developer/SubmitProjectModal';
-import { MOCK_POSTS } from '@/lib/mock-data';
 import { ProjectPost } from '@/types';
 import { ArrowRight, MessageSquareText, SlidersHorizontal } from 'lucide-react';
 
@@ -19,12 +18,10 @@ export default function HomePage() {
       const res = await fetch('/api/posts');
       if (res.ok) {
         const data = await res.json();
-        setPosts(data.length > 0 ? data : [...MOCK_POSTS]);
-      } else {
-        setPosts([...MOCK_POSTS]);
+        setPosts(Array.isArray(data) ? data : []);
       }
     } catch (err) {
-      setPosts([...MOCK_POSTS]);
+      setPosts([]);
     }
   };
 
@@ -58,11 +55,11 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="max-w-5xl w-full mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-8 sm:pb-12 text-center">
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.15] mb-4 sm:mb-6">
-          The Direct Feedback Platform for Web Applications
+          Poke Web Apps. Get Instant QA Feedback.
         </h1>
 
         <p className="text-sm sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed mb-6 sm:mb-8">
-          Developers submit project URLs to gather real-user QA inspection reports. Reviewers test web apps and log detailed feedback without friction.
+          The QA inspection platform built for web applications. Developers share live web links, and reviewers poke around to deliver actionable bug reports.
         </p>
 
         {/* Action button triggers */}
@@ -72,17 +69,17 @@ export default function HomePage() {
             className="w-full sm:w-auto px-6 py-3 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-sm"
           >
             <MessageSquareText className="w-4 h-4" />
-            <span>Explore Reviewer Feed</span>
+            <span>Poke Dev's Apps</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
 
-          <Link
-            href="/dashboard"
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
             className="w-full sm:w-auto px-6 py-3 rounded-full bg-white hover:bg-gray-100 dark:bg-white/10 dark:hover:bg-white/15 text-slate-900 dark:text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all border border-gray-200 dark:border-white/10"
           >
             <SlidersHorizontal className="w-4 h-4" />
-            <span>Developer Dashboard</span>
-          </Link>
+            <span>Post Your Web App</span>
+          </button>
         </div>
       </section>
 

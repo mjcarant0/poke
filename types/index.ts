@@ -5,11 +5,12 @@ export type FeedbackType = 'BUG' | 'FEATURE' | 'GENERAL';
 export type FeedbackStatus = 'NEW' | 'REVIEWING' | 'IN_PROGRESS' | 'FIXED' | 'CLOSED';
 
 export type ProjectCategory =
-  | 'SaaS'
-  | 'E-Commerce'
-  | 'Game'
-  | 'Portfolio'
-  | 'Mobile';
+  | 'SaaS App'
+  | 'E-Commerce Web'
+  | 'Web Tool & Utility'
+  | 'Web Dashboard & Portal'
+  | 'Landing & Portfolio'
+  | 'Content & Media Web';
 
 export interface ProjectPost {
   id: string;

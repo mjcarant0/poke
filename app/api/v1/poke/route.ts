@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { MOCK_QA_COMMENTS } from '@/lib/mock-data';
 
 export async function OPTIONS() {
   return new NextResponse(null, {
@@ -38,47 +37,23 @@ export async function POST(req: NextRequest) {
     const notes = qaNotes || description || message || title || 'Structured QA Report';
     const testPage = pageTested || (pageUrl ? new URL(pageUrl, 'https://localhost').pathname : '/home');
 
-    let newComment;
-
-    try {
-      newComment = await prisma.qAComment.create({
-        data: {
-          postId,
-          type: type.toUpperCase(),
-          qaNotes: notes,
-          screenshotUrl: screenshotUrl || null,
-          pageTested: testPage,
-          browser: browser || null,
-          os: os || null,
-          deviceType: deviceType || null,
-          screenResolution: screenResolution || null,
-          referrer: referrer || null,
-          timestamp: timestamp || null,
-          status: 'NEW',
-          upvotes: 0,
-        },
-      });
-    } catch (dbError) {
-      newComment = {
-        id: 'qa_' + Date.now(),
+    const newComment = await prisma.qAComment.create({
+      data: {
         postId,
         type: type.toUpperCase(),
         qaNotes: notes,
         screenshotUrl: screenshotUrl || null,
         pageTested: testPage,
-        browser: browser || 'Chrome 140',
-        os: os || 'Windows 11',
-        deviceType: deviceType || 'Desktop (1920x1080)',
-        screenResolution: screenResolution || '1920 x 1080',
-        referrer: referrer || '/home',
-        timestamp: timestamp || '8:30 PM',
+        browser: browser || null,
+        os: os || null,
+        deviceType: deviceType || null,
+        screenResolution: screenResolution || null,
+        referrer: referrer || null,
+        timestamp: timestamp || null,
         status: 'NEW',
         upvotes: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      MOCK_QA_COMMENTS.unshift(newComment as any);
-    }
+      },
+    });
 
     return NextResponse.json(
       { success: true, comment: newComment },

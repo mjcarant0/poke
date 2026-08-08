@@ -3,7 +3,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { ProjectPost, QAComment } from '@/types';
-import { MOCK_POSTS, MOCK_QA_COMMENTS } from '@/lib/mock-data';
 import { Navbar } from '@/components/navigation/Navbar';
 import { Footer } from '@/components/navigation/Footer';
 import { PostCard } from '@/components/feed/PostCard';
@@ -33,25 +32,17 @@ function PostDetailPageContent({ postId }: { postId: string }) {
         if (postsRes.ok) {
           const postsData = await postsRes.json();
           const found = postsData.find((p: any) => p.id === postId);
-          if (found) {
-            setPost(found);
-          } else {
-            setPost(MOCK_POSTS.find((p) => p.id === postId) || MOCK_POSTS[0] || null);
-          }
-        } else {
-          setPost(MOCK_POSTS.find((p) => p.id === postId) || MOCK_POSTS[0] || null);
+          setPost(found || null);
         }
 
         const commentsRes = await fetch(`/api/posts/${postId}/comments`);
         if (commentsRes.ok) {
           const commentsData = await commentsRes.json();
-          setComments(commentsData);
-        } else {
-          setComments([...MOCK_QA_COMMENTS]);
+          setComments(Array.isArray(commentsData) ? commentsData : []);
         }
       } catch (err) {
-        setPost(MOCK_POSTS.find((p) => p.id === postId) || MOCK_POSTS[0] || null);
-        setComments([...MOCK_QA_COMMENTS]);
+        setPost(null);
+        setComments([]);
       } finally {
         setLoading(false);
       }

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { MOCK_QA_COMMENTS } from '@/lib/mock-data';
 
 // Persistent in-memory storage fallback
 const inMemoryComments: Record<string, any[]> = {};
@@ -111,7 +110,7 @@ export async function POST(
             title: 'Community Project',
             description: 'Web application submitted for review',
             url: 'https://poke-app.dev',
-            category: 'SaaS',
+            category: 'SaaS App',
             authorEmail: 'dev@poke-app.dev',
             upvotes: 0,
           },

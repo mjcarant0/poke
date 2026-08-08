@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { MOCK_POSTS } from '@/lib/mock-data';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 export async function GET() {
   try {
-    let posts = await prisma.projectPost.findMany({
+    const posts = await prisma.projectPost.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
         author: {
@@ -16,39 +15,6 @@ export async function GET() {
         },
       },
     });
-
-    if (!posts || posts.length === 0) {
-      for (const mock of MOCK_POSTS) {
-        try {
-          await prisma.projectPost.create({
-            data: {
-              id: mock.id,
-              title: mock.title,
-              description: mock.description,
-              url: mock.url,
-              category: mock.category || 'SaaS',
-              authorEmail: mock.authorEmail || 'dev@poke-app.dev',
-              images: mock.images ? JSON.stringify(mock.images) : null,
-              upvotes: mock.upvotes || 0,
-            },
-          });
-        } catch (seedErr) {
-          // Ignore duplicate seed error
-        }
-      }
-
-      posts = await prisma.projectPost.findMany({
-        orderBy: { createdAt: 'desc' },
-        include: {
-          author: {
-            select: { name: true, username: true, email: true },
-          },
-          _count: {
-            select: { comments: true },
-          },
-        },
-      });
-    }
 
     const formatted = posts.map((p) => {
       let imagesArray: string[] = [];
@@ -67,15 +33,15 @@ export async function GET() {
     });
 
     return NextResponse.json(formatted);
-  } catch (err) {
-    return NextResponse.json(MOCK_POSTS);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Database fetch error' }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, description = '', url, category = 'SaaS', authorEmail = 'dev@poke-app.dev', images = [] } = body;
+    const { title, description = '', url, category = 'SaaS App', authorEmail = 'dev@poke-app.dev', images = [] } = body;
 
     if (!title || !url) {
       return NextResponse.json({ error: 'Post title and live application URL are required' }, { status: 400 });

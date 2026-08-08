@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'POKE — Minimalist Feedback & Bug Collector',
-  description: 'Target-based bug reports and QA feedback collector for web applications.',
+  title: 'POKE — Product Showcase & QA Testing Platform',
+  description: 'Poke web apps, report visual bugs, and collaborate with QA reviewers seamlessly.',
 };
 
 export default function RootLayout({

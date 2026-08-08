@@ -16,7 +16,7 @@ export function SubmitProjectModal({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
-  const [category, setCategory] = useState<ProjectCategory>('SaaS');
+  const [category, setCategory] = useState<ProjectCategory>('SaaS App');
   const [ownerEmail, setOwnerEmail] = useState('developer@poke-app.dev');
   const [images, setImages] = useState<string[]>([]);
 
@@ -324,11 +324,12 @@ export function SubmitProjectModal({
                 onChange={(e) => setCategory(e.target.value as ProjectCategory)}
                 className="w-full bg-white dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-bold"
               >
-                <option value="SaaS">SaaS</option>
-                <option value="E-Commerce">E-Commerce</option>
-                <option value="Game">Game</option>
-                <option value="Portfolio">Portfolio</option>
-                <option value="Mobile">Mobile</option>
+                <option value="SaaS App">SaaS App</option>
+                <option value="E-Commerce Web">E-Commerce Web</option>
+                <option value="Web Tool & Utility">Web Tool & Utility</option>
+                <option value="Web Dashboard & Portal">Web Dashboard & Portal</option>
+                <option value="Landing & Portfolio">Landing & Portfolio</option>
+                <option value="Content & Media Web">Content & Media Web</option>
               </select>
             </div>
           </div>

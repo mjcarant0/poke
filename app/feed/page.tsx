@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { ProjectPost, ProjectCategory } from '@/types';
-import { MOCK_POSTS } from '@/lib/mock-data';
 import { Navbar } from '@/components/navigation/Navbar';
 import { Footer } from '@/components/navigation/Footer';
 import { PostCard } from '@/components/feed/PostCard';
@@ -23,12 +22,10 @@ function FeedPageContent() {
       const res = await fetch('/api/posts');
       if (res.ok) {
         const data = await res.json();
-        setPosts(data.length > 0 ? data : [...MOCK_POSTS]);
-      } else {
-        setPosts([...MOCK_POSTS]);
+        setPosts(Array.isArray(data) ? data : []);
       }
     } catch (err) {
-      setPosts([...MOCK_POSTS]);
+      setPosts([]);
     } finally {
       setLoading(false);
     }
@@ -112,7 +109,7 @@ function FeedPageContent() {
             All Categories
           </button>
 
-          {(['SaaS', 'E-Commerce', 'Game', 'Portfolio', 'Mobile'] as ProjectCategory[]).map((cat) => (
+          {(['SaaS App', 'E-Commerce Web', 'Web Tool & Utility', 'Web Dashboard & Portal', 'Landing & Portfolio', 'Content & Media Web'] as ProjectCategory[]).map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
