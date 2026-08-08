@@ -4,6 +4,17 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'POKE — Product Showcase & QA Testing Platform',
   description: 'Poke web apps, report visual bugs, and collaborate with QA reviewers seamlessly.',
+  openGraph: {
+    title: 'POKE — Product Showcase & QA Testing Platform',
+    description: 'Poke web apps, report visual bugs, and collaborate with QA reviewers seamlessly.',
+    type: 'website',
+    siteName: 'POKE',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'POKE — Product Showcase & QA Testing Platform',
+    description: 'Poke web apps, report visual bugs, and collaborate with QA reviewers seamlessly.',
+  },
 };
 
 export default function RootLayout({
