@@ -102,7 +102,7 @@ export function PostCard({ post }: PostCardProps) {
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <button
               onClick={handleUpvote}
-              className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold transition-all border border-emerald-200 dark:border-emerald-500/30"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white text-xs font-extrabold transition-all border border-gray-200 dark:border-white/10"
               title="Upvote post (Account required, cannot upvote own post)"
             >
               <ThumbsUp className="w-3.5 h-3.5" />

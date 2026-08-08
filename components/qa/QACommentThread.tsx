@@ -269,7 +269,7 @@ export function QACommentThread({
                 <button
                   type="button"
                   onClick={() => handleUpvoteCommentItem(comment.id)}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[11px] font-extrabold transition-colors border border-emerald-200 dark:border-emerald-500/30"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white text-[11px] font-extrabold transition-colors border border-gray-200 dark:border-white/10"
                   title="Upvote QA report (Account required, cannot upvote own comment)"
                 >
                   <ThumbsUp className="w-3 h-3" />

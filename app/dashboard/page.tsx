@@ -363,11 +363,11 @@ function DeveloperDashboardContent() {
                       className="w-full md:w-auto bg-gray-50 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-full px-3 py-1.5 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-extrabold"
                       title="Filter reports by date range to optimize database payload"
                     >
-                      <option value="today">⚡ Fresh (Today)</option>
-                      <option value="24h">⏱️ Past 24 Hours</option>
-                      <option value="week">📅 This Week</option>
-                      <option value="month">🗓️ This Month</option>
-                      <option value="all">📁 All Time History</option>
+                      <option value="today">Fresh (Today)</option>
+                      <option value="24h">Past 24 Hours</option>
+                      <option value="week">This Week</option>
+                      <option value="month">This Month</option>
+                      <option value="all">All Time</option>
                     </select>
                   </div>
                 </div>
