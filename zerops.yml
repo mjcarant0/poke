@@ -19,7 +19,7 @@ zerops:
       envVariables:
         DATABASE_URL: ${db_connectionString}
       prepareCommands:
-        - npx prisma db push --accept-data-loss
+        - npx prisma db push --accept-data-loss --schema=prisma/schema.prisma
       ports:
         - port: 3000
           httpSupport: true
