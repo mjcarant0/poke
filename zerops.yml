@@ -1,0 +1,24 @@
+zerops:
+  - setup: app
+    build:
+      base: nodejs@22
+      buildCommands:
+        - npm ci
+        - npx prisma generate
+        - npm run build
+      deployFiles:
+        - .next
+        - public
+        - package.json
+        - package-lock.json
+        - node_modules
+        - prisma
+        - next.config.mjs
+    run:
+      base: nodejs@22
+      ports:
+        - port: 3000
+          httpSupport: true
+      start: npm start
+
+
