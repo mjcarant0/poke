@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { QAComment, FeedbackType } from '@/types';
 import { autoCaptureBrowserSpecs } from '@/lib/user-agent';
-import { Send, Upload, AlertCircle, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Send, Upload, AlertCircle, Image as ImageIcon, Trash2, RefreshCw, Check } from 'lucide-react';
 
 interface QACommentFormProps {
   postId: string;
@@ -51,6 +51,7 @@ export function QACommentForm({
 
   const [screenshots, setScreenshots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [submitStage, setSubmitStage] = useState<'idle' | 'uploading' | 'processing' | 'success'>('idle');
 
   useEffect(() => {
     const captured = autoCaptureBrowserSpecs();
@@ -129,7 +130,12 @@ export function QACommentForm({
     }
 
     setLoading(true);
+    setSubmitStage('uploading');
     setErrors({});
+
+    const processTimer = setTimeout(() => {
+      setSubmitStage('processing');
+    }, 1200);
 
     const finalNotes = targetElement.trim()
       ? `[Target Element: ${targetElement.trim()}]\n${qaNotes.trim()}`
@@ -157,22 +163,31 @@ export function QACommentForm({
         body: JSON.stringify(payload),
       });
 
+      clearTimeout(processTimer);
+
       if (res.ok) {
+        setSubmitStage('success');
         const createdComment = await res.json();
         onCommentSubmitted(createdComment);
 
-        setTargetElement('');
-        setQaNotes('');
-        setPageTested('');
-        setScreenshots([]);
-        setTouched({});
-        setErrors({});
+        setTimeout(() => {
+          setTargetElement('');
+          setQaNotes('');
+          setPageTested('');
+          setScreenshots([]);
+          setTouched({});
+          setErrors({});
+          setSubmitStage('idle');
+        }, 800);
       } else {
         const errorData = await res.json();
         setErrors({ submit: errorData.error || 'Failed to submit QA inspection report.' });
+        setSubmitStage('idle');
       }
     } catch (err) {
+      clearTimeout(processTimer);
       setErrors({ submit: 'Network connection error. Please try again.' });
+      setSubmitStage('idle');
     } finally {
       setLoading(false);
     }
@@ -370,10 +385,32 @@ export function QACommentForm({
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
+          className="w-full py-2.5 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-85"
         >
-          <Send className="w-4 h-4" />
-          <span>{loading ? 'Submitting Report...' : 'Submit QA Inspection Report'}</span>
+          {submitStage === 'uploading' && (
+            <>
+              <RefreshCw className="w-4 h-4 animate-spin text-amber-400 dark:text-amber-500" />
+              <span>Uploading attachments & specs...</span>
+            </>
+          )}
+          {submitStage === 'processing' && (
+            <>
+              <RefreshCw className="w-4 h-4 animate-spin text-blue-400 dark:text-blue-500" />
+              <span>Saving to database, still processing...</span>
+            </>
+          )}
+          {submitStage === 'success' && (
+            <>
+              <Check className="w-4 h-4 text-emerald-400 dark:text-emerald-500" />
+              <span>Successfully submitted!</span>
+            </>
+          )}
+          {submitStage === 'idle' && (
+            <>
+              <Send className="w-4 h-4" />
+              <span>Submit QA Inspection Report</span>
+            </>
+          )}
         </button>
       </form>
     </div>

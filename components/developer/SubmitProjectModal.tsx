@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Globe, Tag, Mail, FileText, Send, AlertCircle, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { X, Plus, Globe, Tag, Mail, FileText, Send, AlertCircle, Upload, Image as ImageIcon, Trash2, RefreshCw, Check } from 'lucide-react';
 import { ProjectCategory } from '@/types';
 
 interface SubmitProjectModalProps {
@@ -22,6 +22,7 @@ export function SubmitProjectModal({
 
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
+  const [submitStage, setSubmitStage] = useState<'idle' | 'uploading' | 'processing' | 'success'>('idle');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -119,7 +120,12 @@ export function SubmitProjectModal({
     }
 
     setLoading(true);
+    setSubmitStage('uploading');
     setError(null);
+
+    const processTimer = setTimeout(() => {
+      setSubmitStage('processing');
+    }, 1200);
 
     let formattedUrl = url.trim();
     if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
@@ -144,19 +150,27 @@ export function SubmitProjectModal({
         body: JSON.stringify(payload),
       });
 
+      clearTimeout(processTimer);
+
       if (res.ok) {
+        setSubmitStage('success');
         const createdData = await res.json();
         onProjectCreated(createdData);
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('poke_post_created', { detail: createdData }));
         }
-        onClose();
+        setTimeout(() => {
+          onClose();
+        }, 800);
       } else {
         const errData = await res.json();
         setError(errData.error || 'Failed to submit project');
+        setSubmitStage('idle');
       }
     } catch (err) {
+      clearTimeout(processTimer);
       setError('Network error. Please try again.');
+      setSubmitStage('idle');
     } finally {
       setLoading(false);
     }
@@ -173,42 +187,43 @@ export function SubmitProjectModal({
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
-                Submit New Project
+                Submit Web App for QA Review
               </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                List your application for reviewer feedback & bug reports
+              <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+                Post your web application for community testers & developers
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 flex items-center justify-center text-gray-500 dark:text-gray-400 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
+        {/* Error Alert */}
         {error && (
-          <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold mb-4 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <div className="mb-4 p-3 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title */}
+          {/* Project Title */}
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1 flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-gray-400" />
-              <span>Project Title <span className="text-rose-500 font-bold ml-0.5">*</span></span>
+              <span>Project Title <span className="text-rose-500">*</span></span>
             </label>
             <input
               type="text"
               value={title}
               onBlur={() => setTouched((prev) => ({ ...prev, title: true }))}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Pulse Analytics"
+              placeholder="e.g. Acme Dashboard & Analytics"
               className={`w-full bg-white dark:bg-[#161b22] border rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder-gray-400 outline-none transition-colors ${
                 touched.title && fieldErrors.title
                   ? 'border-rose-500 focus:border-rose-600 ring-2 ring-rose-500/20'
@@ -223,18 +238,19 @@ export function SubmitProjectModal({
             )}
           </div>
 
-          {/* Description */}
+          {/* Project Description */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
-              Description & Testing Instructions <span className="text-rose-500 font-bold ml-0.5">*</span>
+            <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1 flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-gray-400" />
+              <span>Description <span className="text-rose-500">*</span></span>
             </label>
             <textarea
               rows={3}
               value={description}
               onBlur={() => setTouched((prev) => ({ ...prev, description: true }))}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe what your project does and what specific features reviewers should test..."
-              className={`w-full bg-white dark:bg-[#161b22] border rounded-2xl p-3 text-xs text-slate-900 dark:text-white placeholder-gray-400 outline-none transition-colors ${
+              placeholder="Briefly describe what your app does and what specific features reviewers should test..."
+              className={`w-full bg-white dark:bg-[#161b22] border rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder-gray-400 outline-none transition-colors resize-none ${
                 touched.description && fieldErrors.description
                   ? 'border-rose-500 focus:border-rose-600 ring-2 ring-rose-500/20'
                   : 'border-gray-200 dark:border-white/10 focus:border-slate-900 dark:focus:border-white'
@@ -292,7 +308,7 @@ export function SubmitProjectModal({
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1 flex items-center gap-1.5">
                 <Globe className="w-3.5 h-3.5 text-gray-400" />
-                <span>Website URL <span className="text-rose-500 font-bold ml-0.5">*</span></span>
+                <span>Live App URL <span className="text-rose-500">*</span></span>
               </label>
               <input
                 type="text"
@@ -338,7 +354,7 @@ export function SubmitProjectModal({
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1 flex items-center gap-1.5">
               <Mail className="w-3.5 h-3.5 text-gray-400" />
-              <span>Owner Email <span className="text-rose-500 font-bold ml-0.5">*</span></span>
+              <span>Developer Contact Email <span className="text-rose-500">*</span></span>
             </label>
             <input
               type="email"
@@ -363,14 +379,35 @@ export function SubmitProjectModal({
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-2.5 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
+            className="w-full mt-2 py-2.5 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-85"
           >
-            <Send className="w-4 h-4" />
-            <span>{loading ? 'Submitting Project...' : 'Submit Project for Review'}</span>
+            {submitStage === 'uploading' && (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin text-amber-400 dark:text-amber-500" />
+                <span>Uploading attachments & specs...</span>
+              </>
+            )}
+            {submitStage === 'processing' && (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin text-blue-400 dark:text-blue-500" />
+                <span>Saving to database, still processing...</span>
+              </>
+            )}
+            {submitStage === 'success' && (
+              <>
+                <Check className="w-4 h-4 text-emerald-400 dark:text-emerald-500" />
+                <span>Successfully published!</span>
+              </>
+            )}
+            {submitStage === 'idle' && (
+              <>
+                <Send className="w-4 h-4" />
+                <span>Submit Project for Review</span>
+              </>
+            )}
           </button>
         </form>
       </div>
     </div>
   );
 }
-

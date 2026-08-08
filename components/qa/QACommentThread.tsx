@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { QAComment, FeedbackStatus, QAReply, formatDisplayDate } from '@/types';
-import { Monitor, Globe, Clock, ChevronDown, CheckCircle2, AlertCircle, Sparkles, MessageSquare, Reply, CornerDownRight, ThumbsUp, XCircle, ImageIcon, Send } from 'lucide-react';
+import { Monitor, Globe, Clock, ChevronDown, CheckCircle2, AlertCircle, Sparkles, MessageSquare, Reply, CornerDownRight, ThumbsUp, XCircle, ImageIcon, Send, RefreshCw } from 'lucide-react';
 
 interface QACommentThreadProps {
   comments: QAComment[];
@@ -111,8 +111,8 @@ export function QACommentThread({
         );
       default:
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-300">
-            NEW
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
+            NOT VIEWED
           </span>
         );
     }
@@ -196,7 +196,7 @@ export function QACommentThread({
                     onChange={(e) => onStatusChange(comment.id, e.target.value as FeedbackStatus)}
                     className="bg-gray-100 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-full px-3 py-1 text-[11px] font-extrabold text-slate-900 dark:text-white outline-none cursor-pointer pr-6 appearance-none"
                   >
-                    <option value="NEW">Status: NEW</option>
+                    <option value="NEW">Status: NOT VIEWED</option>
                     <option value="REVIEWING">Status: REVIEWING</option>
                     <option value="IN_PROGRESS">Status: IN PROGRESS</option>
                     <option value="FIXED">Status: FIXED</option>
@@ -352,8 +352,17 @@ export function QACommentThread({
                     disabled={submittingReply || !replyInput.trim()}
                     className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm disabled:opacity-50"
                   >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Send</span>
+                    {submittingReply ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Sending...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Send</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

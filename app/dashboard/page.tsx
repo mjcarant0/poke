@@ -8,7 +8,7 @@ import { QACommentThread } from '@/components/qa/QACommentThread';
 import { SubmitProjectModal } from '@/components/developer/SubmitProjectModal';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { QALineGraph } from '@/components/dashboard/QALineGraph';
-import { Search, Filter, RefreshCw, Plus, Lock, UserPlus, LogIn, Inbox, Bug, Lightbulb, MessageSquare, Clock } from 'lucide-react';
+import { Search, Filter, RefreshCw, Plus, Lock, UserPlus, LogIn, Inbox, Bug, Lightbulb, MessageSquare, Clock, X, SlidersHorizontal, Check } from 'lucide-react';
 
 function DeveloperDashboardContent() {
   const [user, setUser] = useState<any>(null);
@@ -24,6 +24,7 @@ function DeveloperDashboardContent() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | null>(null);
 
   useEffect(() => {
@@ -273,61 +274,6 @@ function DeveloperDashboardContent() {
                 {/* Activity line graph visualization */}
                 <QALineGraph comments={comments} />
 
-                {/* Filter buttons */}
-                <div className="mb-4">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-2">
-                    Filter Reports by Type
-                  </label>
-                  <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                    <button
-                      onClick={() => setTypeFilter('ALL')}
-                      className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap ${
-                        typeFilter === 'ALL'
-                          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
-                          : 'bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10'
-                      }`}
-                    >
-                      All ({totalComments})
-                    </button>
-
-                    <button
-                      onClick={() => setTypeFilter('BUG')}
-                      className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                        typeFilter === 'BUG'
-                          ? 'bg-rose-600 text-white shadow-sm'
-                          : 'bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-rose-600 dark:text-rose-400 border border-gray-200 dark:border-white/10'
-                      }`}
-                    >
-                      <Bug className="w-3.5 h-3.5" />
-                      <span>Bugs ({bugCount})</span>
-                    </button>
-
-                    <button
-                      onClick={() => setTypeFilter('FEATURE')}
-                      className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                        typeFilter === 'FEATURE'
-                          ? 'bg-amber-600 text-white shadow-sm'
-                          : 'bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-amber-600 dark:text-amber-400 border border-gray-200 dark:border-white/10'
-                      }`}
-                    >
-                      <Lightbulb className="w-3.5 h-3.5" />
-                      <span>Feature Suggestions ({featureCount})</span>
-                    </button>
-
-                    <button
-                      onClick={() => setTypeFilter('GENERAL')}
-                      className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                        typeFilter === 'GENERAL'
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-blue-600 dark:text-blue-400 border border-gray-200 dark:border-white/10'
-                      }`}
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>General Feedback ({generalCount})</span>
-                    </button>
-                  </div>
-                </div>
-
                 {/* Filter Control Bar */}
                 <div className="poke-card p-4 rounded-2xl mb-6 dark:bg-[#0d1117] dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="relative w-full md:w-72">
@@ -341,36 +287,207 @@ function DeveloperDashboardContent() {
                     />
                   </div>
 
-                  <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
-                    <Filter className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value as FeedbackStatus | 'ALL')}
-                      className="w-full md:w-auto bg-gray-50 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-full px-3 py-1.5 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-bold"
+                  <div className="flex items-center gap-2.5 w-full md:w-auto flex-wrap">
+                    <button
+                      onClick={() => setIsFilterModalOpen(true)}
+                      className={`inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full text-xs font-extrabold transition-all border shadow-sm ${
+                        typeFilter !== 'ALL' || statusFilter !== 'ALL' || timeframe !== 'today'
+                          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white'
+                          : 'bg-white dark:bg-[#161b22] hover:bg-gray-100 dark:hover:bg-white/10 text-slate-900 dark:text-white border-gray-200 dark:border-white/10'
+                      }`}
                     >
-                      <option value="ALL">All Statuses</option>
-                      <option value="NEW">NEW</option>
-                      <option value="REVIEWING">REVIEWING</option>
-                      <option value="IN_PROGRESS">IN_PROGRESS</option>
-                      <option value="FIXED">FIXED</option>
-                      <option value="CLOSED">CLOSED</option>
-                    </select>
+                      <Filter className="w-3.5 h-3.5" />
+                      <span>Filter Reports</span>
+                      {(typeFilter !== 'ALL' || statusFilter !== 'ALL' || timeframe !== 'today') && (
+                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                      )}
+                    </button>
 
-                    <Clock className="w-3.5 h-3.5 text-gray-400 flex-shrink-0 ml-1" />
-                    <select
-                      value={timeframe}
-                      onChange={(e) => setTimeframe(e.target.value as any)}
-                      className="w-full md:w-auto bg-gray-50 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-full px-3 py-1.5 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-extrabold"
-                      title="Filter reports by date range to optimize database payload"
-                    >
-                      <option value="today">Fresh (Today)</option>
-                      <option value="24h">Past 24 Hours</option>
-                      <option value="week">This Week</option>
-                      <option value="month">This Month</option>
-                      <option value="all">All Time</option>
-                    </select>
+                    <span className="text-[11px] font-mono text-gray-500 dark:text-gray-400">
+                      showing {filteredComments.length} of {totalComments} reports
+                    </span>
                   </div>
                 </div>
+
+                {/* Filter Modal Container */}
+                {isFilterModalOpen && (
+                  <div
+                    className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
+                    onClick={() => setIsFilterModalOpen(false)}
+                  >
+                    <div
+                      className="poke-card w-full max-w-lg bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Modal Header */}
+                      <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-white/10 mb-5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-2xl bg-gray-100 dark:bg-white/10 flex items-center justify-center text-slate-900 dark:text-white">
+                            <SlidersHorizontal className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
+                              Filter QA Reports
+                            </h3>
+                            <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                              Select report categories, statuses, or time period
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setIsFilterModalOpen(false)}
+                          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-500 dark:text-gray-300 flex items-center justify-center transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Filter Sections */}
+                      <div className="space-y-5">
+                        {/* Section 1: Feedback Category */}
+                        <div>
+                          <label className="block text-xs font-black text-slate-900 dark:text-white mb-2 uppercase tracking-wider">
+                            Report Type
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => setTypeFilter('ALL')}
+                              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border flex items-center justify-between ${
+                                typeFilter === 'ALL'
+                                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white'
+                                  : 'bg-gray-50 dark:bg-[#161b22] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-100'
+                              }`}
+                            >
+                              <span>All Types ({totalComments})</span>
+                              {typeFilter === 'ALL' && <Check className="w-3.5 h-3.5" />}
+                            </button>
+
+                            <button
+                              onClick={() => setTypeFilter('BUG')}
+                              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border flex items-center justify-between ${
+                                typeFilter === 'BUG'
+                                  ? 'bg-rose-600 text-white border-rose-600'
+                                  : 'bg-gray-50 dark:bg-[#161b22] text-rose-600 dark:text-rose-400 border-gray-200 dark:border-white/10 hover:bg-gray-100'
+                              }`}
+                            >
+                              <span className="flex items-center gap-1.5">
+                                <Bug className="w-3.5 h-3.5" />
+                                <span>Bugs ({bugCount})</span>
+                              </span>
+                              {typeFilter === 'BUG' && <Check className="w-3.5 h-3.5" />}
+                            </button>
+
+                            <button
+                              onClick={() => setTypeFilter('FEATURE')}
+                              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border flex items-center justify-between ${
+                                typeFilter === 'FEATURE'
+                                  ? 'bg-amber-600 text-white border-amber-600'
+                                  : 'bg-gray-50 dark:bg-[#161b22] text-amber-600 dark:text-amber-400 border-gray-200 dark:border-white/10 hover:bg-gray-100'
+                              }`}
+                            >
+                              <span className="flex items-center gap-1.5">
+                                <Lightbulb className="w-3.5 h-3.5" />
+                                <span>Features ({featureCount})</span>
+                              </span>
+                              {typeFilter === 'FEATURE' && <Check className="w-3.5 h-3.5" />}
+                            </button>
+
+                            <button
+                              onClick={() => setTypeFilter('GENERAL')}
+                              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border flex items-center justify-between ${
+                                typeFilter === 'GENERAL'
+                                  ? 'bg-blue-600 text-white border-blue-600'
+                                  : 'bg-gray-50 dark:bg-[#161b22] text-blue-600 dark:text-blue-400 border-gray-200 dark:border-white/10 hover:bg-gray-100'
+                              }`}
+                            >
+                              <span className="flex items-center gap-1.5">
+                                <MessageSquare className="w-3.5 h-3.5" />
+                                <span>General ({generalCount})</span>
+                              </span>
+                              {typeFilter === 'GENERAL' && <Check className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Section 2: Resolution Status */}
+                        <div>
+                          <label className="block text-xs font-black text-slate-900 dark:text-white mb-2 uppercase tracking-wider">
+                            Resolution Status
+                          </label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {(['ALL', 'NEW', 'REVIEWING', 'IN_PROGRESS', 'FIXED', 'CLOSED'] as const).map((st) => (
+                              <button
+                                key={st}
+                                onClick={() => setStatusFilter(st)}
+                                className={`px-2.5 py-2 rounded-xl text-xs font-extrabold transition-all border text-center ${
+                                  statusFilter === st
+                                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white'
+                                    : 'bg-gray-50 dark:bg-[#161b22] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-100'
+                                }`}
+                              >
+                                {st === 'ALL' ? 'All Statuses' : st === 'NEW' ? 'NOT VIEWED' : st.replace('_', ' ')}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Section 3: Time Range */}
+                        <div>
+                          <label className="block text-xs font-black text-slate-900 dark:text-white mb-2 uppercase tracking-wider">
+                            Time Range
+                          </label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {[
+                              { key: 'today', label: 'Fresh (Today)' },
+                              { key: '24h', label: 'Past 24 Hours' },
+                              { key: 'week', label: 'This Week' },
+                              { key: 'month', label: 'This Month' },
+                              { key: 'all', label: 'All Time' },
+                            ].map((t) => (
+                              <button
+                                key={t.key}
+                                onClick={() => setTimeframe(t.key as any)}
+                                className={`px-3 py-2 rounded-xl text-xs font-extrabold transition-all border flex items-center justify-between ${
+                                  timeframe === t.key
+                                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white'
+                                    : 'bg-gray-50 dark:bg-[#161b22] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-100'
+                                }`}
+                              >
+                                <span className="flex items-center gap-1.5">
+                                  <Clock className="w-3.5 h-3.5" />
+                                  <span>{t.label}</span>
+                                </span>
+                                {timeframe === t.key && <Check className="w-3 h-3" />}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Modal Footer Actions */}
+                      <div className="flex items-center justify-between pt-5 border-t border-gray-100 dark:border-white/10 mt-6 gap-3">
+                        <button
+                          onClick={() => {
+                            setTypeFilter('ALL');
+                            setStatusFilter('ALL');
+                            setTimeframe('today');
+                          }}
+                          className="px-4 py-2 rounded-full text-xs font-bold text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+                        >
+                          Reset Filters
+                        </button>
+
+                        <button
+                          onClick={() => setIsFilterModalOpen(false)}
+                          className="px-6 py-2 rounded-full bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-slate-900 text-xs font-black shadow-md transition-all"
+                        >
+                          Apply Filters
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Thread Feed */}
                 {loadingComments ? (
