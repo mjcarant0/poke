@@ -49,7 +49,7 @@ export function parseUserAgent(uaString: string | null | undefined): ParsedUserA
 }
 
 export function autoDetectCountry(): string {
-  if (typeof window === 'undefined') return 'United States';
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return 'United States';
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     if (tz.includes('Manila')) return 'Philippines';
@@ -64,7 +64,7 @@ export function autoDetectCountry(): string {
     if (tz.includes('Toronto') || tz.includes('Vancouver')) return 'Canada';
     if (tz.includes('America/')) return 'United States';
 
-    const lang = navigator.language || '';
+    const lang = (typeof navigator !== 'undefined' && navigator.language) ? navigator.language : '';
     if (lang.endsWith('-PH')) return 'Philippines';
     if (lang.endsWith('-DE')) return 'Germany';
     if (lang.endsWith('-GB')) return 'United Kingdom';
@@ -78,23 +78,38 @@ export function autoDetectCountry(): string {
 }
 
 export function autoCaptureBrowserSpecs() {
-  if (typeof window === 'undefined') {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
     return {
       browser: 'Chrome 140',
       os: 'Windows 11',
       deviceType: 'Desktop',
       screenResolution: '1920 x 1080',
       country: 'United States',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: '12:00 PM',
       referrer: '/home',
       pageTested: '/',
     };
   }
 
-  const parsed = parseUserAgent(navigator.userAgent);
-  const screenResolution = `${window.screen.width} x ${window.screen.height}`;
+  const userAgentStr = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+  const parsed = parseUserAgent(userAgentStr);
+  const screenResolution = typeof window !== 'undefined' && window.screen ? `${window.screen.width} x ${window.screen.height}` : '1920 x 1080';
   const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const country = autoDetectCountry();
+
+  let referrerPath = '/home';
+  try {
+    if (typeof document !== 'undefined' && document.referrer) {
+      referrerPath = new URL(document.referrer).pathname;
+    }
+  } catch (e) {}
+
+  let currentPath = '/';
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      currentPath = window.location.pathname;
+    }
+  } catch (e) {}
 
   return {
     browser: parsed.browser,
@@ -103,7 +118,7 @@ export function autoCaptureBrowserSpecs() {
     screenResolution,
     country,
     timestamp,
-    referrer: document.referrer ? new URL(document.referrer).pathname : '/home',
-    pageTested: window.location.pathname,
+    referrer: referrerPath,
+    pageTested: currentPath,
   };
 }
