@@ -20,10 +20,8 @@ zerops:
       base: nodejs@22
       prepareCommands:
         - sudo apk add --no-cache openssl
-      envVariables:
-        DATABASE_URL: ${db_connectionString}
       initCommands:
-        - DEBUG="prisma:*" ./node_modules/.bin/prisma db push --accept-data-loss --skip-generate
+        - ./node_modules/.bin/prisma db push --accept-data-loss
       ports:
         - port: 3000
           httpSupport: true
