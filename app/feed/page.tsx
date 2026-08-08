@@ -142,33 +142,14 @@ function FeedPageContent() {
           </div>
         </div>
 
-        {/* Category Pills & Filter Button Bar */}
+        {/* Filter Posts Bar */}
         <div className="flex items-center justify-between gap-3 mb-6">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none flex-1 min-w-0">
-            <button
-              onClick={() => setActiveCategory('ALL')}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-extrabold transition-all whitespace-nowrap ${
-                activeCategory === 'ALL'
-                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
-                  : 'bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10'
-              }`}
-            >
-              All Categories
-            </button>
-
-            {(['SaaS App', 'E-Commerce Web', 'Web Tool & Utility', 'Web Dashboard & Portal', 'Landing & Portfolio', 'Content & Media Web'] as ProjectCategory[]).map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-extrabold transition-all whitespace-nowrap ${
-                  activeCategory === cat
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
-                    : 'bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="text-xs font-bold text-gray-500 dark:text-gray-400">
+            {activeCategory !== 'ALL' ? (
+              <span>Category filter: <strong className="text-slate-900 dark:text-white">{activeCategory}</strong></span>
+            ) : (
+              <span>All Projects</span>
+            )}
           </div>
 
           <button
