@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { QAComment, FeedbackStatus, QAReply, formatDisplayDate } from '@/types';
-import { Monitor, Globe, Clock, ChevronDown, CheckCircle2, AlertCircle, Sparkles, MessageSquare, Reply, CornerDownRight, ThumbsUp, XCircle, ImageIcon } from 'lucide-react';
+import { Monitor, Globe, Clock, ChevronDown, CheckCircle2, AlertCircle, Sparkles, MessageSquare, Reply, CornerDownRight, ThumbsUp, XCircle, ImageIcon, Send } from 'lucide-react';
 
 interface QACommentThreadProps {
   comments: QAComment[];
