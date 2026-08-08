@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getAuthenticatedUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,11 +13,32 @@ export async function GET(
 ) {
   try {
     const postId = params.id;
+    const { searchParams } = new URL(req.url);
+    const timeframe = searchParams.get('timeframe') || 'all';
+
+    let dateFilter: Date | undefined;
+    const now = new Date();
+
+    if (timeframe === 'today') {
+      dateFilter = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    } else if (timeframe === '24h') {
+      dateFilter = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    } else if (timeframe === 'week') {
+      dateFilter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (timeframe === 'month') {
+      dateFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+
+    const whereCondition: any = { postId };
+    if (dateFilter) {
+      whereCondition.createdAt = { gte: dateFilter };
+    }
 
     try {
       const comments = await prisma.qAComment.findMany({
-        where: { postId },
+        where: whereCondition,
         orderBy: { createdAt: 'desc' },
+        take: timeframe === 'today' || timeframe === '24h' ? 30 : 150,
         include: {
           labels: {
             include: { label: true },
@@ -76,7 +98,6 @@ export async function POST(
       type = 'GENERAL',
       qaNotes,
       notes,
-      country = 'United States',
       screenshotUrl,
       screenshots = [],
       pageTested,
@@ -122,13 +143,20 @@ export async function POST(
       // Ignore
     }
 
+    const currentUser = await getAuthenticatedUser(req);
+    const authorName = currentUser
+      ? (currentUser.username ? `@${currentUser.username}` : currentUser.email)
+      : 'Anonymous';
+    const authorId = currentUser ? currentUser.userId : null;
+
     try {
       const newComment = await prisma.qAComment.create({
         data: {
           postId,
           type: type.toUpperCase(),
           qaNotes: actualNotes,
-          country: country ? String(country).trim() : 'United States',
+          authorName,
+          authorId,
           screenshotUrl: firstScreenshotUrl,
           screenshots: screenshotsJson,
           pageTested: pageTested || null,

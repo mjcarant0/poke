@@ -8,7 +8,7 @@ import { QACommentThread } from '@/components/qa/QACommentThread';
 import { SubmitProjectModal } from '@/components/developer/SubmitProjectModal';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { QALineGraph } from '@/components/dashboard/QALineGraph';
-import { Search, Filter, RefreshCw, Plus, Lock, UserPlus, LogIn, Inbox, Bug, Lightbulb, MessageSquare } from 'lucide-react';
+import { Search, Filter, RefreshCw, Plus, Lock, UserPlus, LogIn, Inbox, Bug, Lightbulb, MessageSquare, Clock } from 'lucide-react';
 
 function DeveloperDashboardContent() {
   const [user, setUser] = useState<any>(null);
@@ -20,6 +20,7 @@ function DeveloperDashboardContent() {
 
   const [typeFilter, setTypeFilter] = useState<FeedbackType | 'ALL'>('ALL');
   const [statusFilter, setStatusFilter] = useState<FeedbackStatus | 'ALL'>('ALL');
+  const [timeframe, setTimeframe] = useState<'today' | '24h' | 'week' | 'month' | 'all'>('today');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -79,7 +80,7 @@ function DeveloperDashboardContent() {
     async function loadComments() {
       setLoadingComments(true);
       try {
-        const res = await fetch(`/api/posts/${currentPostId}/comments`);
+        const res = await fetch(`/api/posts/${currentPostId}/comments?timeframe=${timeframe}`);
         if (res.ok) {
           const commentsData = await res.json();
           setComments(commentsData);
@@ -94,7 +95,7 @@ function DeveloperDashboardContent() {
     }
 
     loadComments();
-  }, [selectedPost]);
+  }, [selectedPost, timeframe]);
 
   const handleStatusChange = async (commentId: string, newStatus: FeedbackStatus) => {
     setComments((prev) =>
@@ -340,7 +341,7 @@ function DeveloperDashboardContent() {
                     />
                   </div>
 
-                  <div className="flex items-center gap-2 w-full md:w-auto">
+                  <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
                     <Filter className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                     <select
                       value={statusFilter}
@@ -353,6 +354,20 @@ function DeveloperDashboardContent() {
                       <option value="IN_PROGRESS">IN_PROGRESS</option>
                       <option value="FIXED">FIXED</option>
                       <option value="CLOSED">CLOSED</option>
+                    </select>
+
+                    <Clock className="w-3.5 h-3.5 text-gray-400 flex-shrink-0 ml-1" />
+                    <select
+                      value={timeframe}
+                      onChange={(e) => setTimeframe(e.target.value as any)}
+                      className="w-full md:w-auto bg-gray-50 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-full px-3 py-1.5 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-extrabold"
+                      title="Filter reports by date range to optimize database payload"
+                    >
+                      <option value="today">⚡ Fresh (Today)</option>
+                      <option value="24h">⏱️ Past 24 Hours</option>
+                      <option value="week">📅 This Week</option>
+                      <option value="month">🗓️ This Month</option>
+                      <option value="all">📁 All Time History</option>
                     </select>
                   </div>
                 </div>

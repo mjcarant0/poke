@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { QAComment, FeedbackStatus, QAReply, formatDisplayDate } from '@/types';
-import { Monitor, Globe, Clock, ChevronDown, CheckCircle2, AlertCircle, Sparkles, MessageSquare, Reply, CornerDownRight, MapPin, XCircle, ImageIcon } from 'lucide-react';
+import { Monitor, Globe, Clock, ChevronDown, CheckCircle2, AlertCircle, Sparkles, MessageSquare, Reply, CornerDownRight, ThumbsUp, XCircle, ImageIcon } from 'lucide-react';
 
 interface QACommentThreadProps {
   comments: QAComment[];
@@ -24,6 +24,26 @@ export function QACommentThread({
   const [localReplies, setLocalReplies] = useState<Record<string, QAReply[]>>({});
   const [submittingReply, setSubmittingReply] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const [commentUpvotes, setCommentUpvotes] = useState<Record<string, number>>({});
+  const [commentUpvoteMsg, setCommentUpvoteMsg] = useState<{ id: string; text: string } | null>(null);
+
+  const handleUpvoteCommentItem = async (commentId: string) => {
+    try {
+      const res = await fetch(`/api/comments/${commentId}/upvote`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setCommentUpvotes((prev) => ({ ...prev, [commentId]: data.upvotes }));
+        setCommentUpvoteMsg({ id: commentId, text: 'Upvoted!' });
+      } else {
+        setCommentUpvoteMsg({ id: commentId, text: data.error || 'Cannot upvote.' });
+      }
+    } catch (e) {
+      setCommentUpvoteMsg({ id: commentId, text: 'Connection error.' });
+    } finally {
+      setTimeout(() => setCommentUpvoteMsg(null), 3000);
+    }
+  };
 
   if (comments.length === 0) {
     return (
@@ -154,8 +174,12 @@ export function QACommentThread({
           >
             {/* Header Row */}
             <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap text-xs">
                 {getTypeBadge(comment.type)}
+
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  Reviewer: <strong className="text-slate-900 dark:text-white font-extrabold">{comment.authorName || 'Anonymous'}</strong>
+                </span>
 
                 {comment.pageTested && (
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gray-100 dark:bg-white/10 text-slate-800 dark:text-gray-200 truncate max-w-[200px]">
@@ -214,7 +238,7 @@ export function QACommentThread({
 
             {/* Technical Context Bar */}
             <div className="bg-gray-50 dark:bg-[#161b22] p-3 rounded-2xl border border-gray-200/80 dark:border-white/10 text-[10px] text-gray-500 dark:text-gray-400 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
                 <div className="flex items-center gap-1 truncate">
                   <Monitor className="w-3 h-3 text-gray-400 flex-shrink-0" />
                   <span className="truncate">{comment.browser || 'Chrome'} · {comment.os || 'Windows'}</span>
@@ -225,13 +249,6 @@ export function QACommentThread({
                   <span className="truncate">Res: {comment.screenResolution || '1920x1080'}</span>
                 </div>
 
-                {comment.country && (
-                  <div className="flex items-center gap-1 truncate text-slate-700 dark:text-gray-300 font-bold">
-                    <MapPin className="w-3 h-3 text-rose-500 flex-shrink-0" />
-                    <span className="truncate">{comment.country}</span>
-                  </div>
-                )}
-
                 <div className="flex items-center gap-1 truncate text-slate-800 dark:text-gray-200 font-bold">
                   <Clock className="w-3 h-3 text-gray-400 flex-shrink-0" />
                   <span className="truncate">
@@ -241,17 +258,35 @@ export function QACommentThread({
                 </div>
               </div>
 
-              {/* Reply Trigger */}
-              <button
-                onClick={() => {
-                  setActiveReplyId(activeReplyId === comment.id ? null : comment.id);
-                  setReplyInput('');
-                }}
-                className="inline-flex items-center gap-1 text-slate-900 dark:text-white font-bold hover:underline self-end sm:self-auto cursor-pointer"
-              >
-                <Reply className="w-3 h-3" />
-                <span>Reply ({allReplies.length})</span>
-              </button>
+              {/* Upvote & Reply Actions */}
+              <div className="flex items-center gap-3 self-end sm:self-auto relative">
+                {commentUpvoteMsg?.id === comment.id && (
+                  <span className="absolute -top-7 right-0 z-10 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md">
+                    {commentUpvoteMsg.text}
+                  </span>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => handleUpvoteCommentItem(comment.id)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[11px] font-extrabold transition-colors border border-emerald-200 dark:border-emerald-500/30"
+                  title="Upvote QA report (Account required, cannot upvote own comment)"
+                >
+                  <ThumbsUp className="w-3 h-3" />
+                  <span>{commentUpvotes[comment.id] !== undefined ? commentUpvotes[comment.id] : (comment.upvotes || 0)}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveReplyId(activeReplyId === comment.id ? null : comment.id);
+                    setReplyInput('');
+                  }}
+                  className="inline-flex items-center gap-1 text-slate-900 dark:text-white text-xs font-bold hover:underline cursor-pointer"
+                >
+                  <Reply className="w-3.5 h-3.5" />
+                  <span>Reply ({allReplies.length})</span>
+                </button>
+              </div>
             </div>
 
             {/* Replies List */}

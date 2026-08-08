@@ -48,35 +48,6 @@ export function parseUserAgent(uaString: string | null | undefined): ParsedUserA
   return { browser, os, deviceType };
 }
 
-export function autoDetectCountry(): string {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') return 'United States';
-  try {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-    if (tz.includes('Manila')) return 'Philippines';
-    if (tz.includes('Tokyo')) return 'Japan';
-    if (tz.includes('Singapore')) return 'Singapore';
-    if (tz.includes('Kolkata') || tz.includes('Calcutta')) return 'India';
-    if (tz.includes('Berlin') || tz.includes('Frankfurt')) return 'Germany';
-    if (tz.includes('London')) return 'United Kingdom';
-    if (tz.includes('Paris')) return 'France';
-    if (tz.includes('Sydney') || tz.includes('Melbourne')) return 'Australia';
-    if (tz.includes('Sao_Paulo')) return 'Brazil';
-    if (tz.includes('Toronto') || tz.includes('Vancouver')) return 'Canada';
-    if (tz.includes('America/')) return 'United States';
-
-    const lang = (typeof navigator !== 'undefined' && navigator.language) ? navigator.language : '';
-    if (lang.endsWith('-PH')) return 'Philippines';
-    if (lang.endsWith('-DE')) return 'Germany';
-    if (lang.endsWith('-GB')) return 'United Kingdom';
-    if (lang.endsWith('-JP') || lang.startsWith('ja')) return 'Japan';
-    if (lang.endsWith('-IN')) return 'India';
-    if (lang.endsWith('-SG')) return 'Singapore';
-  } catch (e) {
-    // Ignore timezone detection error
-  }
-  return 'United States';
-}
-
 export function autoCaptureBrowserSpecs() {
   if (typeof window === 'undefined' || typeof navigator === 'undefined') {
     return {
@@ -84,7 +55,6 @@ export function autoCaptureBrowserSpecs() {
       os: 'Windows 11',
       deviceType: 'Desktop',
       screenResolution: '1920 x 1080',
-      country: 'United States',
       timestamp: '12:00 PM',
       referrer: '/home',
       pageTested: '/',
@@ -95,7 +65,6 @@ export function autoCaptureBrowserSpecs() {
   const parsed = parseUserAgent(userAgentStr);
   const screenResolution = typeof window !== 'undefined' && window.screen ? `${window.screen.width} x ${window.screen.height}` : '1920 x 1080';
   const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const country = autoDetectCountry();
 
   let referrerPath = '/home';
   try {
@@ -116,7 +85,6 @@ export function autoCaptureBrowserSpecs() {
     os: parsed.os,
     deviceType: parsed.deviceType,
     screenResolution,
-    country,
     timestamp,
     referrer: referrerPath,
     pageTested: currentPath,

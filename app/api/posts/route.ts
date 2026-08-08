@@ -43,7 +43,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, description = '', url, category = 'SaaS App', country = 'United States', authorEmail = 'dev@poke-app.dev', images = [] } = body;
+    const { title, description = '', url, category = 'SaaS App', authorEmail = 'dev@poke-app.dev', images = [] } = body;
 
     if (!title || !url) {
       return NextResponse.json({ error: 'Post title and live application URL are required' }, { status: 400 });
@@ -64,7 +64,6 @@ export async function POST(req: NextRequest) {
         description: description.trim(),
         url: formattedUrl,
         category,
-        country: country.trim(),
         authorEmail: currentUser?.email || authorEmail,
         authorId: currentUser?.userId || null,
         images: imagesJson,

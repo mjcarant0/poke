@@ -18,7 +18,6 @@ export function QACommentForm({
   const [targetElement, setTargetElement] = useState('');
   const [qaNotes, setQaNotes] = useState('');
   const [pageTested, setPageTested] = useState('');
-  const [country, setCountry] = useState('United States');
 
   const [specs, setSpecs] = useState<{
     browser: string;
@@ -55,9 +54,6 @@ export function QACommentForm({
 
   useEffect(() => {
     const captured = autoCaptureBrowserSpecs();
-    if (captured.country) {
-      setCountry(captured.country);
-    }
     setSpecs({
       browser: captured.browser,
       os: captured.os,
@@ -143,7 +139,6 @@ export function QACommentForm({
       postId,
       type,
       notes: finalNotes,
-      country,
       pageTested: pageTested.trim() || undefined,
       screenshotUrl: screenshots[0] || null,
       screenshots,
@@ -289,31 +284,6 @@ export function QACommentForm({
               <p className="text-[10px] font-bold text-rose-500 mt-1">{errors.targetElement}</p>
             )}
           </div>
-        </div>
-
-        {/* Country Selection */}
-        <div>
-          <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">
-            Reviewer Country / Location
-          </label>
-          <select
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            className="w-full bg-white dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-bold"
-          >
-            <option value="United States">🇺🇸 United States</option>
-            <option value="Philippines">🇵🇭 Philippines</option>
-            <option value="Germany">🇩🇪 Germany</option>
-            <option value="United Kingdom">🇬🇧 United Kingdom</option>
-            <option value="Canada">🇨🇦 Canada</option>
-            <option value="Australia">🇦🇺 Australia</option>
-            <option value="Japan">🇯🇵 Japan</option>
-            <option value="India">🇮🇳 India</option>
-            <option value="Singapore">🇸🇬 Singapore</option>
-            <option value="France">🇫🇷 France</option>
-            <option value="Brazil">🇧🇷 Brazil</option>
-            <option value="Global / Remote">🌐 Global / Remote</option>
-          </select>
         </div>
 
         {/* Detailed Inspection Notes */}

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ProjectPost, formatDisplayDate } from '@/types';
-import { ExternalLink, MessageSquareText, Globe, ImageIcon, MapPin } from 'lucide-react';
+import { ExternalLink, MessageSquareText, Globe, ImageIcon, ThumbsUp } from 'lucide-react';
 
 interface PostCardProps {
   post: ProjectPost;
@@ -12,6 +12,8 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [upvotes, setUpvotes] = useState(post.upvotes || 0);
+  const [upvoteMsg, setUpvoteMsg] = useState<string | null>(null);
 
   const developerName =
     post.author?.name ||
@@ -22,8 +24,31 @@ export function PostCard({ post }: PostCardProps) {
 
   const imagesList = post.images || [];
 
+  const handleUpvote = async () => {
+    try {
+      const res = await fetch(`/api/posts/${post.id}/upvote`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setUpvotes(data.upvotes);
+        setUpvoteMsg('Upvoted!');
+      } else {
+        setUpvoteMsg(data.error || 'Cannot upvote.');
+      }
+    } catch (e) {
+      setUpvoteMsg('Connection error.');
+    } finally {
+      setTimeout(() => setUpvoteMsg(null), 3000);
+    }
+  };
+
   return (
-    <div className="poke-card p-4 sm:p-5 rounded-3xl dark:bg-[#0d1117] dark:border-white/10 shadow-sm transition-all hover:shadow-md border border-gray-200">
+    <div className="poke-card p-4 sm:p-5 rounded-3xl dark:bg-[#0d1117] dark:border-white/10 shadow-sm transition-all hover:shadow-md border border-gray-200 relative">
+      {upvoteMsg && (
+        <div className="absolute top-3 right-4 z-10 px-3 py-1 rounded-full text-xs font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md transition-all">
+          {upvoteMsg}
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         {/* Main Post Details */}
         <div className="flex-1 min-w-0">
@@ -35,12 +60,6 @@ export function PostCard({ post }: PostCardProps) {
 
             <span className="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1.5 flex-wrap">
               <span>Posted by <strong className="text-slate-800 dark:text-gray-200">{developerName}</strong></span>
-              {post.country && (
-                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-white/10 text-slate-700 dark:text-gray-300 font-semibold text-[11px]">
-                  <MapPin className="w-3 h-3 text-rose-500" />
-                  <span>{post.country}</span>
-                </span>
-              )}
               <span>· {formatDisplayDate(post.createdAt)}</span>
             </span>
           </div>
@@ -81,6 +100,15 @@ export function PostCard({ post }: PostCardProps) {
 
           {/* Action Links */}
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <button
+              onClick={handleUpvote}
+              className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold transition-all border border-emerald-200 dark:border-emerald-500/30"
+              title="Upvote post (Account required, cannot upvote own post)"
+            >
+              <ThumbsUp className="w-3.5 h-3.5" />
+              <span>{upvotes} Upvotes</span>
+            </button>
+
             <a
               href={post.url}
               target="_blank"

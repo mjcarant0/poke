@@ -31,7 +31,6 @@ export interface ProjectPost {
   description: string;
   url: string;
   category: ProjectCategory;
-  country?: string | null;
   authorEmail: string;
   authorId?: string;
   images?: string[];
@@ -77,7 +76,8 @@ export interface QAComment {
   postId: string;
   type: FeedbackType;
   qaNotes: string;
-  country?: string | null;
+  authorName?: string;
+  authorId?: string | null;
   screenshotUrl?: string | null;
   screenshots?: string[];
   pageTested?: string | null;

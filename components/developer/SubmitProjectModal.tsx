@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Globe, Tag, Mail, FileText, Send, AlertCircle, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { ProjectCategory } from '@/types';
-import { autoDetectCountry } from '@/lib/user-agent';
 
 interface SubmitProjectModalProps {
   onClose: () => void;
@@ -18,7 +17,6 @@ export function SubmitProjectModal({
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
   const [category, setCategory] = useState<ProjectCategory>('SaaS App');
-  const [country, setCountry] = useState('United States');
   const [ownerEmail, setOwnerEmail] = useState('developer@poke-app.dev');
   const [images, setImages] = useState<string[]>([]);
 
@@ -27,11 +25,6 @@ export function SubmitProjectModal({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const detected = autoDetectCountry();
-      if (detected) setCountry(detected);
-    } catch (e) {}
-
     try {
       const stored = localStorage.getItem('poke_user');
       if (stored) {
@@ -138,7 +131,6 @@ export function SubmitProjectModal({
       description,
       url: formattedUrl,
       category,
-      country,
       authorEmail: ownerEmail,
       ownerEmail,
       images,
@@ -340,32 +332,6 @@ export function SubmitProjectModal({
                 <option value="Content & Media Web">Content & Media Web</option>
               </select>
             </div>
-          </div>
-
-          {/* Country Selection */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1 flex items-center gap-1.5">
-              <Globe className="w-3.5 h-3.5 text-gray-400" />
-              <span>Country / Location</span>
-            </label>
-            <select
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              className="w-full bg-white dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-bold"
-            >
-              <option value="United States">🇺🇸 United States</option>
-              <option value="Philippines">🇵🇭 Philippines</option>
-              <option value="Germany">🇩🇪 Germany</option>
-              <option value="United Kingdom">🇬🇧 United Kingdom</option>
-              <option value="Canada">🇨🇦 Canada</option>
-              <option value="Australia">🇦🇺 Australia</option>
-              <option value="Japan">🇯🇵 Japan</option>
-              <option value="India">🇮🇳 India</option>
-              <option value="Singapore">🇸🇬 Singapore</option>
-              <option value="France">🇫🇷 France</option>
-              <option value="Brazil">🇧🇷 Brazil</option>
-              <option value="Global / Remote">🌐 Global / Remote</option>
-            </select>
           </div>
 
           {/* Owner Email */}
