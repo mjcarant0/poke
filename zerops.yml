@@ -23,11 +23,8 @@ zerops:
       envVariables:
         DATABASE_URL: ${db_connectionString}
       initCommands:
-        - ./node_modules/.bin/prisma db push --accept-data-loss
+        - DEBUG="prisma:*" ./node_modules/.bin/prisma db push --accept-data-loss --skip-generate
       ports:
         - port: 3000
           httpSupport: true
       start: npm start
-
-
-
