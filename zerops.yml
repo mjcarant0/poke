@@ -16,6 +16,8 @@ zerops:
         - next.config.mjs
     run:
       base: nodejs@22
+      prepareCommands:
+        - npx prisma db push --skip-generate
       ports:
         - port: 3000
           httpSupport: true
