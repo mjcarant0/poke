@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, createSessionToken } from '@/lib/auth';
 
-// In-memory user store fallback for dev resilience
-const MOCK_USERS: any[] = [];
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -77,58 +74,12 @@ export async function POST(req: NextRequest) {
       });
 
       return res;
-    } catch (dbErr) {
-      // In-memory fallback if DB constraint occurs
-      const existingMem = MOCK_USERS.find(
-        (u) => u.email === cleanEmail || u.username === cleanUsername
-      );
-
-      if (existingMem) {
-        if (existingMem.email === cleanEmail) {
-          return NextResponse.json({ error: 'Email address is already registered.' }, { status: 400 });
-        }
-        if (existingMem.username === cleanUsername) {
-          return NextResponse.json({ error: 'Username is already taken.' }, { status: 400 });
-        }
-      }
-
-      const hashedPassword = await hashPassword(cleanPassword);
-      const fallbackUser = {
-        id: 'user_' + Date.now(),
-        name: name.trim(),
-        username: cleanUsername,
-        email: cleanEmail,
-        password: hashedPassword,
-      };
-
-      MOCK_USERS.push(fallbackUser);
-
-      const token = await createSessionToken({
-        userId: fallbackUser.id,
-        username: fallbackUser.username,
-        email: fallbackUser.email,
-      });
-
-      const res = NextResponse.json({
-        user: {
-          id: fallbackUser.id,
-          name: fallbackUser.name,
-          username: fallbackUser.username,
-          email: fallbackUser.email,
-        },
-      }, { status: 201 });
-
-      res.cookies.set('poke_session', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
-      });
-
-      return res;
+    } catch (dbErr: any) {
+      console.error('Registration DB Error:', dbErr);
+      return NextResponse.json({ error: dbErr.message || 'Database error during registration.' }, { status: 500 });
     }
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
   }
 }
+

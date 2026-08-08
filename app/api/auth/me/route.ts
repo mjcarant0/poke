@@ -22,19 +22,11 @@ export async function GET(req: NextRequest) {
     if (user) {
       return NextResponse.json({ authenticated: true, user });
     }
-  } catch (err) {
-    // Fallback using token payload if database query is offline
+    return NextResponse.json({ authenticated: false, user: null });
+  } catch (err: any) {
+    console.error('Auth check DB Error:', err);
+    return NextResponse.json({ authenticated: false, user: null, error: err.message });
   }
-
-  return NextResponse.json({
-    authenticated: true,
-    user: {
-      id: session.userId,
-      name: session.username,
-      username: session.username,
-      email: session.email,
-    },
-  });
 }
 
 export async function PUT(req: NextRequest) {

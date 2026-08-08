@@ -58,10 +58,12 @@ export async function POST(req: NextRequest) {
       });
 
       return response;
-    } catch (dbErr) {
-      return NextResponse.json({ error: 'Invalid credentials or database unavailable.' }, { status: 401 });
+    } catch (dbErr: any) {
+      console.error('Login DB Error:', dbErr);
+      return NextResponse.json({ error: dbErr.message || 'Database error during login.' }, { status: 500 });
     }
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Server error during login' }, { status: 500 });
   }
 }
+
