@@ -36,9 +36,9 @@ export function QACommentThread({
       if (res.ok) {
         setCommentUpvotes((prev) => ({ ...prev, [commentId]: data.upvotes }));
         setCommentHasUpvoted((prev) => ({ ...prev, [commentId]: data.hasUpvoted }));
-        setCommentUpvoteMsg({ id: commentId, text: data.hasUpvoted ? 'Upvoted!' : 'Upvote removed' });
+        setCommentUpvoteMsg({ id: commentId, text: data.hasUpvoted ? 'Liked!' : 'Like removed' });
       } else {
-        setCommentUpvoteMsg({ id: commentId, text: data.error || 'Cannot upvote.' });
+        setCommentUpvoteMsg({ id: commentId, text: data.error || 'Cannot like.' });
       }
     } catch (e) {
       setCommentUpvoteMsg({ id: commentId, text: 'Connection error.' });
@@ -160,76 +160,76 @@ export function QACommentThread({
   return (
     <div className="space-y-4">
       {comments.map((comment) => {
-        const allReplies = [
-          ...(comment.replies || []),
-          ...(localReplies[comment.id] || []),
-        ];
-
-        const screenshotsList = comment.screenshots && comment.screenshots.length > 0
-          ? comment.screenshots
-          : (comment.screenshotUrl ? [comment.screenshotUrl] : []);
+        const extraReplies = localReplies[comment.id] || [];
+        const allReplies = [...(comment.replies || []), ...extraReplies];
 
         return (
           <div
             key={comment.id}
-            className="poke-card p-4 sm:p-5 rounded-3xl dark:bg-[#0d1117] dark:border-white/10 border border-gray-200 shadow-sm transition-all"
+            className="poke-card p-4 sm:p-5 rounded-3xl dark:bg-[#0d1117] dark:border-white/10 border border-gray-200 shadow-sm"
           >
-            {/* Header Row */}
-            <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-              <div className="flex items-center gap-2 flex-wrap text-xs">
+            {/* Main Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-3 border-b border-gray-100 dark:border-white/5">
+              <div className="flex items-center gap-2 flex-wrap">
                 {getTypeBadge(comment.type)}
 
-                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                  Reviewer: <strong className="text-slate-900 dark:text-white font-extrabold">{comment.authorName || 'Anonymous'}</strong>
-                </span>
-
-                {comment.pageTested && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gray-100 dark:bg-white/10 text-slate-800 dark:text-gray-200 truncate max-w-[200px]">
-                    Route: {comment.pageTested}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Status:</span>
+                  {onStatusChange ? (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <select
+                        value={comment.status}
+                        onChange={(e) => onStatusChange(comment.id, e.target.value as FeedbackStatus)}
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border outline-none cursor-pointer ${
+                          comment.status === 'FIXED'
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
+                            : comment.status === 'REVIEWING'
+                            ? 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30'
+                            : comment.status === 'IN_PROGRESS'
+                            ? 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30'
+                            : 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30'
+                        }`}
+                      >
+                        <option value="NEW" className="bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400">NOT VIEWED</option>
+                        <option value="REVIEWING" className="bg-white dark:bg-gray-900 text-purple-600 dark:text-purple-400">REVIEWING</option>
+                        <option value="IN_PROGRESS" className="bg-white dark:bg-gray-900 text-amber-600 dark:text-amber-400">IN_PROGRESS</option>
+                        <option value="FIXED" className="bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400">FIXED</option>
+                      </select>
+                    </div>
+                  ) : (
+                    getStatusBadge(comment.status)
+                  )}
+                </div>
               </div>
 
-              {/* Status Dropdown or Badge */}
-              {isDeveloperView && onStatusChange ? (
-                <div className="relative">
-                  <select
-                    value={comment.status}
-                    onChange={(e) => onStatusChange(comment.id, e.target.value as FeedbackStatus)}
-                    className="bg-gray-100 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-full px-3 py-1 text-[11px] font-extrabold text-slate-900 dark:text-white outline-none cursor-pointer pr-6 appearance-none"
-                  >
-                    <option value="NEW">Status: NOT VIEWED</option>
-                    <option value="REVIEWING">Status: REVIEWING</option>
-                    <option value="IN_PROGRESS">Status: IN PROGRESS</option>
-                    <option value="FIXED">Status: FIXED</option>
-                    <option value="CLOSED">Status: CLOSED</option>
-                  </select>
-                  <ChevronDown className="w-3 h-3 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
-              ) : (
-                getStatusBadge(comment.status)
-              )}
+              {/* Author Attribution */}
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                <span>By:</span>
+                <strong className="text-slate-900 dark:text-white font-extrabold">
+                  {comment.authorName || 'Anonymous'}
+                </strong>
+              </div>
             </div>
 
-            {/* QA Notes Content */}
-            <p className="text-xs text-slate-900 dark:text-white font-medium leading-relaxed mb-4 whitespace-pre-wrap">
+            {/* Comment Body */}
+            <div className="text-xs text-slate-800 dark:text-gray-200 leading-relaxed font-medium mb-3 whitespace-pre-line">
               {comment.qaNotes}
-            </p>
+            </div>
 
-            {/* Screenshots Preview */}
-            {screenshotsList.length > 0 && (
-              <div className="mb-4">
-                <div className="flex items-center gap-1.5 mb-1.5 text-[10px] font-bold text-gray-500 dark:text-gray-400">
+            {/* Screenshots grid */}
+            {comment.screenshots && comment.screenshots.length > 0 && (
+              <div className="mb-3">
+                <div className="flex items-center gap-1 mb-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400">
                   <ImageIcon className="w-3 h-3" />
-                  <span>Attached Screenshot Proofs ({screenshotsList.length})</span>
+                  <span>Screenshots ({comment.screenshots.length})</span>
                 </div>
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                  {screenshotsList.map((img, idx) => (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                  {comment.screenshots.map((img, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => setSelectedImage(img)}
-                      className="flex-shrink-0 w-28 h-16 sm:w-32 sm:h-20 rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:scale-105 transition-transform"
+                      className="flex-shrink-0 w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:scale-105 transition-transform"
                     >
                       <img src={img} alt={`Proof ${idx + 1}`} className="w-full h-full object-cover" />
                     </button>
@@ -238,18 +238,22 @@ export function QACommentThread({
               </div>
             )}
 
-            {/* Technical Context Bar */}
-            <div className="bg-gray-50 dark:bg-[#161b22] p-3 rounded-2xl border border-gray-200/80 dark:border-white/10 text-[10px] text-gray-500 dark:text-gray-400 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
-                <div className="flex items-center gap-1 truncate">
-                  <Monitor className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                  <span className="truncate">{comment.browser || 'Chrome'} · {comment.os || 'Windows'}</span>
-                </div>
+            {/* Specs & Metadata */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-gray-100 dark:border-white/5 text-[11px] text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-3 flex-wrap">
+                {comment.pageTested && (
+                  <div className="flex items-center gap-1 truncate text-slate-800 dark:text-gray-200 font-bold">
+                    <Globe className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                    <span className="truncate">{comment.pageTested}</span>
+                  </div>
+                )}
 
-                <div className="flex items-center gap-1 truncate">
-                  <Globe className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                  <span className="truncate">Res: {comment.screenResolution || '1920x1080'}</span>
-                </div>
+                {comment.browser && (
+                  <div className="flex items-center gap-1 text-slate-800 dark:text-gray-200 font-bold">
+                    <Monitor className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                    <span>{comment.browser} · {comment.os}</span>
+                  </div>
+                )}
 
                 <div className="flex items-center gap-1 truncate text-slate-800 dark:text-gray-200 font-bold">
                   <Clock className="w-3 h-3 text-gray-400 flex-shrink-0" />
@@ -281,7 +285,7 @@ export function QACommentThread({
                           ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white'
                           : 'bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white border-gray-200 dark:border-white/10'
                       }`}
-                      title={isUpvoted ? 'Remove upvote' : 'Upvote QA report (Account required, cannot upvote own comment)'}
+                      title={isUpvoted ? 'Remove like' : 'Like QA report (Account required, cannot like own comment)'}
                     >
                       <ThumbsUp className={`w-3 h-3 ${isUpvoted ? 'fill-current' : ''}`} />
                       <span>{commentUpvotes[comment.id] !== undefined ? commentUpvotes[comment.id] : (comment.upvotes || 0)}</span>
