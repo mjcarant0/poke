@@ -73,9 +73,10 @@ export async function POST(
     const postId = params.id;
     const body = await req.json();
     const {
-      type = 'BUG',
-      notes,
+      type = 'GENERAL',
       qaNotes,
+      notes,
+      country = 'United States',
       screenshotUrl,
       screenshots = [],
       pageTested,
@@ -127,6 +128,7 @@ export async function POST(
           postId,
           type: type.toUpperCase(),
           qaNotes: actualNotes,
+          country: country ? String(country).trim() : 'United States',
           screenshotUrl: firstScreenshotUrl,
           screenshots: screenshotsJson,
           pageTested: pageTested || null,

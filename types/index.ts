@@ -12,12 +12,26 @@ export type ProjectCategory =
   | 'Landing & Portfolio'
   | 'Content & Media Web';
 
+export function formatDisplayDate(dateInput?: string | Date | null): string {
+  if (!dateInput) return '';
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return String(dateInput);
+
+  const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
+  const month = months[d.getMonth()];
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+
+  return `${month} ${day}, ${year}`;
+}
+
 export interface ProjectPost {
   id: string;
   title: string;
   description: string;
   url: string;
   category: ProjectCategory;
+  country?: string | null;
   authorEmail: string;
   authorId?: string;
   images?: string[];
@@ -63,6 +77,7 @@ export interface QAComment {
   postId: string;
   type: FeedbackType;
   qaNotes: string;
+  country?: string | null;
   screenshotUrl?: string | null;
   screenshots?: string[];
   pageTested?: string | null;

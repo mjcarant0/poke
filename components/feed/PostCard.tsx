@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ProjectPost } from '@/types';
-import { ExternalLink, MessageSquareText, Globe, ImageIcon } from 'lucide-react';
+import { ProjectPost, formatDisplayDate } from '@/types';
+import { ExternalLink, MessageSquareText, Globe, ImageIcon, MapPin } from 'lucide-react';
 
 interface PostCardProps {
   post: ProjectPost;
@@ -20,20 +20,6 @@ export function PostCard({ post }: PostCardProps) {
       ? post.authorEmail.split('@')[0]
       : post.authorEmail || 'Developer');
 
-  const getRelativeTime = (dateVal: string | Date) => {
-    try {
-      const timestamp = typeof dateVal === 'string' ? new Date(dateVal).getTime() : dateVal.getTime();
-      const diff = Math.floor((Date.now() - timestamp) / 1000);
-      if (isNaN(diff) || diff < 0) return 'Just now';
-      if (diff < 60) return `${diff}s ago`;
-      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-      return `${Math.floor(diff / 86400)}d ago`;
-    } catch {
-      return 'Recently';
-    }
-  };
-
   const imagesList = post.images || [];
 
   return (
@@ -42,13 +28,20 @@ export function PostCard({ post }: PostCardProps) {
         {/* Main Post Details */}
         <div className="flex-1 min-w-0">
           {/* Category Badge & Developer Info */}
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <div className="flex items-center gap-2 mb-2 flex-wrap text-xs">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-white dark:bg-white dark:text-slate-900 uppercase">
               {post.category}
             </span>
 
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-              Posted by <span className="font-bold text-slate-800 dark:text-gray-200">{developerName}</span> · {getRelativeTime(post.createdAt)}
+            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1.5 flex-wrap">
+              <span>Posted by <strong className="text-slate-800 dark:text-gray-200">{developerName}</strong></span>
+              {post.country && (
+                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-white/10 text-slate-700 dark:text-gray-300 font-semibold text-[11px]">
+                  <MapPin className="w-3 h-3 text-rose-500" />
+                  <span>{post.country}</span>
+                </span>
+              )}
+              <span>· {formatDisplayDate(post.createdAt)}</span>
             </span>
           </div>
 

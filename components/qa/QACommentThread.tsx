@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { QAComment, FeedbackStatus, QAReply } from '@/types';
-import { Monitor, Globe, Clock, ChevronDown, CheckCircle2, AlertCircle, Sparkles, MessageSquare, Reply, CornerDownRight, Send, XCircle, ImageIcon } from 'lucide-react';
+import { QAComment, FeedbackStatus, QAReply, formatDisplayDate } from '@/types';
+import { Monitor, Globe, Clock, ChevronDown, CheckCircle2, AlertCircle, Sparkles, MessageSquare, Reply, CornerDownRight, MapPin, XCircle, ImageIcon } from 'lucide-react';
 
 interface QACommentThreadProps {
   comments: QAComment[];
@@ -214,7 +214,7 @@ export function QACommentThread({
 
             {/* Technical Context Bar */}
             <div className="bg-gray-50 dark:bg-[#161b22] p-3 rounded-2xl border border-gray-200/80 dark:border-white/10 text-[10px] text-gray-500 dark:text-gray-400 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 flex-1">
                 <div className="flex items-center gap-1 truncate">
                   <Monitor className="w-3 h-3 text-gray-400 flex-shrink-0" />
                   <span className="truncate">{comment.browser || 'Chrome'} · {comment.os || 'Windows'}</span>
@@ -225,9 +225,19 @@ export function QACommentThread({
                   <span className="truncate">Res: {comment.screenResolution || '1920x1080'}</span>
                 </div>
 
-                <div className="flex items-center gap-1 truncate">
+                {comment.country && (
+                  <div className="flex items-center gap-1 truncate text-slate-700 dark:text-gray-300 font-bold">
+                    <MapPin className="w-3 h-3 text-rose-500 flex-shrink-0" />
+                    <span className="truncate">{comment.country}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-1 truncate text-slate-800 dark:text-gray-200 font-bold">
                   <Clock className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                  <span className="truncate">{comment.timestamp || 'Just now'}</span>
+                  <span className="truncate">
+                    {formatDisplayDate(comment.createdAt)}
+                    {comment.timestamp ? ` · ${comment.timestamp}` : ''}
+                  </span>
                 </div>
               </div>
 

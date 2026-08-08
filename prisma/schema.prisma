@@ -25,7 +25,8 @@ model ProjectPost {
   title       String
   description String
   url         String
-  category    String      @default("SaaS")
+  category    String      @default("SaaS App")
+  country     String?
   authorEmail String
   authorId    String?
   author      User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
@@ -42,6 +43,7 @@ model QAComment {
   post             ProjectPost    @relation(fields: [postId], references: [id], onDelete: Cascade)
   type             String         @default("GENERAL")
   qaNotes          String
+  country          String?
   screenshotUrl    String?
   screenshots      String?
   pageTested       String?
