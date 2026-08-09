@@ -22,29 +22,34 @@ Key capabilities:
 
 ## Architecture & Zerops Deployment
 
-POKE is a full-stack Next.js application hosted on Zerops, connecting to a Supabase PostgreSQL database.
+POKE is a full-stack Next.js application hosted entirely on Zerops, utilizing Zerops Node.js 22 runtime and a native Zerops PostgreSQL database service.
 
 - Hosting & Infrastructure: Zerops (Next.js Node.js 22 service)
-- Database: Supabase PostgreSQL (connected via Prisma ORM)
+- Database: Zerops PostgreSQL (connected via Prisma ORM)
 - Application Stack: Next.js App Router, TypeScript, Tailwind CSS
 
 ### How Zerops is Used
 
-Zerops hosts and manages the web application runtime container.
+Zerops hosts both the application runtime container and the native PostgreSQL database service.
 
 Deployment process:
-1. Build Container (Node.js 22):
-   - Installs Alpine system dependencies (OpenSSL) required for the Prisma ORM query engine.
+1. Zerops PostgreSQL Database Service:
+   - Dedicated PostgreSQL database service provisioned natively on Zerops.
+   - Dynamically exposes database credentials (`db_user`, `db_password`, `db_hostname`, `db_port`) for secure inter-service connection.
+
+2. Node.js 22 Build Service:
+   - Installs Alpine system dependencies (`openssl`) required for the Prisma ORM engine.
    - Installs application packages (`npm ci`).
    - Generates Prisma client types (`npx prisma generate`).
    - Compiles the production Next.js application (`npm run build`).
 
-2. Deployment Package:
-   - Deploys compiled Next.js output, static public assets, node modules, and Prisma configuration files.
+3. Deployment Package:
+   - Deploys compiled Next.js output, static assets, node modules, and Prisma schema files.
 
-3. Runtime Service (Node.js 22):
-   - Executes database schema synchronization on container startup (`npx prisma db push`).
-   - Exposes HTTP traffic on port 3000 (`npm start`).
+4. Node.js 22 Runtime Service:
+   - Connects to Zerops PostgreSQL via dynamic environment variable interpolation (`postgresql://${db_user}:${db_password}@${db_hostname}:${db_port}/db?schema=public`).
+   - Synchronizes database schema automatically on container startup (`npx prisma db push`).
+   - Serves HTTP web traffic on port 3000 (`npm start`).
 
 ---
 
