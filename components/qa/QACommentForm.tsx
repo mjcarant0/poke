@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { QAComment, FeedbackType } from '@/types';
 import { autoCaptureBrowserSpecs } from '@/lib/user-agent';
+import { compressImage } from '@/lib/image';
 import { Send, Upload, AlertCircle, Image as ImageIcon, Trash2, RefreshCw, Check } from 'lucide-react';
 
 interface QACommentFormProps {
@@ -74,9 +75,9 @@ export function QACommentForm({
 
     const filesToProcess = Array.from(filesList).slice(0, remainingSlots);
 
-    filesToProcess.forEach((file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors((prev) => ({ ...prev, file: 'Some files exceed the 5MB limit and were skipped.' }));
+    filesToProcess.forEach(async (file) => {
+      if (file.size > 10 * 1024 * 1024) {
+        setErrors((prev) => ({ ...prev, file: 'Some files exceed the 10MB limit and were skipped.' }));
         return;
       }
       if (!file.type.startsWith('image/')) {
@@ -84,13 +85,20 @@ export function QACommentForm({
         return;
       }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setScreenshots((prev) => [...prev, reader.result as string]);
+      try {
+        const compressedDataUrl = await compressImage(file);
+        if (compressedDataUrl) {
+          setScreenshots((prev) => [...prev, compressedDataUrl]);
         }
-      };
-      reader.readAsDataURL(file);
+      } catch (e) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === 'string') {
+            setScreenshots((prev) => [...prev, reader.result as string]);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     });
   };
 

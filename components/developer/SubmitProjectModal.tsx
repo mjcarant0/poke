@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Globe, Tag, Mail, FileText, Send, AlertCircle, Upload, Image as ImageIcon, Trash2, RefreshCw, Check } from 'lucide-react';
 import { ProjectCategory } from '@/types';
+import { compressImage } from '@/lib/image';
 
 interface SubmitProjectModalProps {
   onClose: () => void;
@@ -74,15 +75,22 @@ export function SubmitProjectModal({
 
     const filesToProcess = Array.from(files).slice(0, remainingSlots);
 
-    filesToProcess.forEach((file) => {
-      if (file.size > 5 * 1024 * 1024) return;
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setImages((prev) => [...prev, reader.result as string]);
+    filesToProcess.forEach(async (file) => {
+      if (file.size > 10 * 1024 * 1024) return;
+      try {
+        const compressedDataUrl = await compressImage(file);
+        if (compressedDataUrl) {
+          setImages((prev) => [...prev, compressedDataUrl]);
         }
-      };
-      reader.readAsDataURL(file);
+      } catch (e) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === 'string') {
+            setImages((prev) => [...prev, reader.result as string]);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     });
   };
 
