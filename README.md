@@ -20,6 +20,12 @@ Key capabilities:
 
 ---
 
+## Demo Video
+
+<video src="./public/demo/2026-08-09-21-46-35-1.mp4" controls width="100%"></video>
+
+---
+
 ## Architecture & Zerops Deployment
 
 POKE is a full-stack Next.js application hosted entirely on Zerops, utilizing Zerops Node.js 22 runtime and a native Zerops PostgreSQL database service.
