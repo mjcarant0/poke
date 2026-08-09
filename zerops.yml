@@ -21,7 +21,7 @@ zerops:
       prepareCommands:
         - sudo apk add --no-cache openssl
       initCommands:
-        - ./node_modules/.bin/prisma db push --accept-data-loss
+        - npx prisma db push --accept-data-loss || true
       ports:
         - port: 3000
           httpSupport: true
