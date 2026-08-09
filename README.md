@@ -22,7 +22,7 @@ Key capabilities:
 
 ## Demo Video
 
-<video src="https://github.com/mjcarant0/poke/blob/main/demo/2026-08-09-21-46-35-1.mp4" controls width="100%"></video>
+<video src="https://raw.githubusercontent.com/mjcarant0/poke/main/public/demo/2026-08-09-21-46-35-1.mp4" controls width="100%"></video>
 
 ---
 
