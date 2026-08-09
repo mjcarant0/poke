@@ -21,7 +21,10 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    const includeArchived = req.nextUrl.searchParams.get('includeArchived') === 'true';
+
     const posts = await prisma.projectPost.findMany({
+      where: includeArchived ? {} : ({ isArchived: false } as any),
       orderBy: { createdAt: 'desc' },
       include: {
         author: {
@@ -33,7 +36,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const formatted = posts.map((p) => {
+    const formatted = posts.map((p: any) => {
       let imagesArray: string[] = [];
       if (p.images) {
         try {
@@ -46,7 +49,7 @@ export async function GET(req: NextRequest) {
         ...p,
         hasUpvoted: userUpvotedPostIds.has(p.id),
         images: imagesArray,
-        commentsCount: p._count.comments,
+        commentsCount: p._count?.comments || 0,
       };
     });
 

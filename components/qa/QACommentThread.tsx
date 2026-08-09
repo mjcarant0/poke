@@ -183,6 +183,8 @@ export function QACommentThread({
                         className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border outline-none cursor-pointer ${
                           comment.status === 'FIXED'
                             ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
+                            : comment.status === 'CLOSED'
+                            ? 'bg-gray-200 text-gray-800 border-gray-300 dark:bg-white/20 dark:text-gray-200 dark:border-white/30'
                             : comment.status === 'REVIEWING'
                             ? 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30'
                             : comment.status === 'IN_PROGRESS'
@@ -194,6 +196,7 @@ export function QACommentThread({
                         <option value="REVIEWING" className="bg-white dark:bg-gray-900 text-purple-600 dark:text-purple-400">REVIEWING</option>
                         <option value="IN_PROGRESS" className="bg-white dark:bg-gray-900 text-amber-600 dark:text-amber-400">IN_PROGRESS</option>
                         <option value="FIXED" className="bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400">FIXED</option>
+                        <option value="CLOSED" className="bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400">CLOSED</option>
                       </select>
                     </div>
                   ) : (

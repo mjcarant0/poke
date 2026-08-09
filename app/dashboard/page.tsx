@@ -8,7 +8,7 @@ import { QACommentThread } from '@/components/qa/QACommentThread';
 import { SubmitProjectModal } from '@/components/developer/SubmitProjectModal';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { QALineGraph } from '@/components/dashboard/QALineGraph';
-import { Search, Filter, RefreshCw, Plus, Lock, UserPlus, LogIn, Inbox, Bug, Lightbulb, MessageSquare, Clock, X, SlidersHorizontal, Check } from 'lucide-react';
+import { Search, Filter, RefreshCw, Plus, Lock, UserPlus, LogIn, Inbox, Bug, Lightbulb, MessageSquare, Clock, X, SlidersHorizontal, Check, Archive, ArchiveRestore, Trash2, AlertTriangle } from 'lucide-react';
 
 function DeveloperDashboardContent() {
   const [user, setUser] = useState<any>(null);
@@ -29,6 +29,12 @@ function DeveloperDashboardContent() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | null>(null);
 
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'archive' | 'unarchive' | 'delete';
+    post: ProjectPost;
+  } | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
   useEffect(() => {
     async function initDashboard() {
       setLoading(true);
@@ -43,7 +49,7 @@ function DeveloperDashboardContent() {
           }
         }
 
-        const postsRes = await fetch('/api/posts');
+        const postsRes = await fetch('/api/posts?includeArchived=true');
         if (postsRes.ok) {
           const postsData: ProjectPost[] = await postsRes.json();
           if (currentUser) {
@@ -128,7 +134,7 @@ function DeveloperDashboardContent() {
 
   const handlePostCreated = async () => {
     try {
-      const postsRes = await fetch('/api/posts');
+      const postsRes = await fetch('/api/posts?includeArchived=true');
       if (postsRes.ok) {
         const postsData: ProjectPost[] = await postsRes.json();
         if (user) {
@@ -145,6 +151,43 @@ function DeveloperDashboardContent() {
       }
     } catch (e) {
       // Ignore reload error
+    }
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmAction) return;
+    setActionLoading(true);
+    const { type, post } = confirmAction;
+
+    try {
+      if (type === 'archive' || type === 'unarchive') {
+        const isArchiving = type === 'archive';
+        const res = await fetch(`/api/posts/${post.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isArchived: isArchiving }),
+        });
+        if (res.ok) {
+          setPosts((prev) =>
+            prev.map((p) => (p.id === post.id ? { ...p, isArchived: isArchiving } : p))
+          );
+          setSelectedPost((prev) => (prev && prev.id === post.id ? { ...prev, isArchived: isArchiving } : prev));
+        }
+      } else if (type === 'delete') {
+        const res = await fetch(`/api/posts/${post.id}`, {
+          method: 'DELETE',
+        });
+        if (res.ok) {
+          const updatedPosts = posts.filter((p) => p.id !== post.id);
+          setPosts(updatedPosts);
+          setSelectedPost(updatedPosts.length > 0 ? updatedPosts[0] : null);
+        }
+      }
+    } catch (err) {
+      // Ignore errors
+    } finally {
+      setActionLoading(false);
+      setConfirmAction(null);
     }
   };
 
@@ -230,20 +273,62 @@ function DeveloperDashboardContent() {
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 {posts.length > 0 && selectedPost && (
-                  <select
-                    value={selectedPost.id}
-                    onChange={(e) => {
-                      const found = posts.find((p) => p.id === e.target.value);
-                      if (found) setSelectedPost(found);
-                    }}
-                    className="bg-gray-100 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-full px-4 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer"
-                  >
-                    {posts.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.title}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <select
+                      value={selectedPost.id}
+                      onChange={(e) => {
+                        const found = posts.find((p) => p.id === e.target.value);
+                        if (found) setSelectedPost(found);
+                      }}
+                      className="bg-gray-100 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-full px-4 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer"
+                    >
+                      {posts.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.title} {p.isArchived ? '(Archived)' : ''}
+                        </option>
+                      ))}
+                    </select>
+
+                    {selectedPost.isArchived ? (
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-500/15 text-amber-500 border border-amber-500/30">
+                        ARCHIVED
+                      </span>
+                    ) : null}
+
+                    {/* Archive / Unarchive Button */}
+                    <button
+                      onClick={() =>
+                        setConfirmAction({
+                          type: selectedPost.isArchived ? 'unarchive' : 'archive',
+                          post: selectedPost,
+                        })
+                      }
+                      title={selectedPost.isArchived ? 'Unarchive Project' : 'Archive Project'}
+                      className="px-3 py-2 rounded-full border border-gray-200 dark:border-white/10 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-bold text-slate-700 dark:text-gray-200 flex items-center gap-1.5 transition-colors"
+                    >
+                      {selectedPost.isArchived ? (
+                        <>
+                          <ArchiveRestore className="w-3.5 h-3.5 text-emerald-500" />
+                          <span className="hidden sm:inline">Unarchive</span>
+                        </>
+                      ) : (
+                        <>
+                          <Archive className="w-3.5 h-3.5 text-amber-500" />
+                          <span className="hidden sm:inline">Archive</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Delete Permanently Button */}
+                    <button
+                      onClick={() => setConfirmAction({ type: 'delete', post: selectedPost })}
+                      title="Delete Project Permanently"
+                      className="px-3 py-2 rounded-full border border-rose-200 dark:border-rose-500/30 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Delete</span>
+                    </button>
+                  </div>
                 )}
 
                 <button
@@ -553,6 +638,102 @@ function DeveloperDashboardContent() {
             window.location.reload();
           }}
         />
+      )}
+
+      {/* Confirmation Modal for Archive / Unarchive / Delete */}
+      {confirmAction && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => !actionLoading && setConfirmAction(null)}
+        >
+          <div
+            className="poke-card w-full max-w-md bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
+                  confirmAction.type === 'delete'
+                    ? 'bg-rose-500/15 text-rose-500'
+                    : confirmAction.type === 'archive'
+                    ? 'bg-amber-500/15 text-amber-500'
+                    : 'bg-emerald-500/15 text-emerald-500'
+                }`}
+              >
+                {confirmAction.type === 'delete' ? (
+                  <Trash2 className="w-5 h-5" />
+                ) : confirmAction.type === 'archive' ? (
+                  <Archive className="w-5 h-5" />
+                ) : (
+                  <ArchiveRestore className="w-5 h-5" />
+                )}
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900 dark:text-white">
+                  {confirmAction.type === 'delete'
+                    ? 'Delete Project Permanently?'
+                    : confirmAction.type === 'archive'
+                    ? 'Archive Project?'
+                    : 'Unarchive Project?'}
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  Project: "{confirmAction.post.title}"
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-[#161b22] border border-gray-200 dark:border-white/10 rounded-2xl p-4 mb-5 text-xs text-gray-600 dark:text-gray-300 space-y-2">
+              {confirmAction.type === 'delete' && (
+                <p className="text-rose-600 dark:text-rose-400 font-semibold flex items-start gap-1.5">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>
+                    This action <strong>cannot be undone</strong>. All QA reports, comments, screenshots, and replies associated with this project will be permanently deleted.
+                  </span>
+                </p>
+              )}
+              {confirmAction.type === 'archive' && (
+                <p>
+                  Are you sure you want to archive <strong>{confirmAction.post.title}</strong>? It will be hidden from the public reviewer feed. Reviewers will no longer be able to view or submit new reports for it. You can unarchive it anytime.
+                </p>
+              )}
+              {confirmAction.type === 'unarchive' && (
+                <p>
+                  Are you sure you want to unarchive <strong>{confirmAction.post.title}</strong>? It will be restored to active status and will become visible again on the public reviewer feed.
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <button
+                disabled={actionLoading}
+                onClick={() => setConfirmAction(null)}
+                className="px-4 py-2 rounded-full border border-gray-200 dark:border-white/10 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={actionLoading}
+                onClick={handleConfirmAction}
+                className={`px-4 py-2 rounded-full text-xs font-black text-white flex items-center gap-2 shadow-sm transition-all ${
+                  confirmAction.type === 'delete'
+                    ? 'bg-rose-600 hover:bg-rose-700'
+                    : confirmAction.type === 'archive'
+                    ? 'bg-amber-600 hover:bg-amber-700'
+                    : 'bg-emerald-600 hover:bg-emerald-700'
+                }`}
+              >
+                {actionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                <span>
+                  {confirmAction.type === 'delete'
+                    ? 'Delete Permanently'
+                    : confirmAction.type === 'archive'
+                    ? 'Confirm Archive'
+                    : 'Confirm Unarchive'}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

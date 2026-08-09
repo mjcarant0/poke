@@ -30,6 +30,8 @@ export function PokeCard({ poke, onSelect, onStatusChange, onUpvote }: PokeCardP
         return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
       case 'FIXED':
         return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+      case 'CLOSED':
+        return 'bg-gray-500/15 text-gray-400 border-gray-500/30';
       default:
         return 'bg-blue-500/15 text-blue-400 border-blue-500/30';
     }
@@ -124,6 +126,7 @@ export function PokeCard({ poke, onSelect, onStatusChange, onUpvote }: PokeCardP
               <option value="REVIEWING" className="bg-white dark:bg-gray-900 text-purple-600 dark:text-purple-400">REVIEWING</option>
               <option value="IN_PROGRESS" className="bg-white dark:bg-gray-900 text-amber-600 dark:text-amber-400">IN_PROGRESS</option>
               <option value="FIXED" className="bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400">FIXED</option>
+              <option value="CLOSED" className="bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">CLOSED</option>
             </select>
           </div>
         </div>

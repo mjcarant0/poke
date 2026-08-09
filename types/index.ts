@@ -35,6 +35,7 @@ export interface ProjectPost {
   authorId?: string;
   images?: string[];
   upvotes: number;
+  isArchived?: boolean;
   hasUpvoted?: boolean;
   createdAt: string | Date;
   commentsCount?: number;
