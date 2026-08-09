@@ -22,7 +22,7 @@ Key capabilities:
 
 ## Demo Video
 
-🎥 **[Watch the POKE Demo Video on LinkedIn](https://www.linkedin.com/posts/marjoycaranto_thezeropschallenge-zerops-wemakedevs-ugcPost-7492236751172902912-GH51/?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAE5j4E4BC-w8vQAsjyURPIZfbMoDn9JEzUM)**
+**[Watch the POKE Demo Video on LinkedIn](https://www.linkedin.com/posts/marjoycaranto_thezeropschallenge-zerops-wemakedevs-ugcPost-7492236751172902912-GH51/?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAE5j4E4BC-w8vQAsjyURPIZfbMoDn9JEzUM)**
 
 ---
 
