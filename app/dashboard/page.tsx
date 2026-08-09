@@ -295,39 +295,47 @@ function DeveloperDashboardContent() {
                       </span>
                     ) : null}
 
-                    {/* Archive / Unarchive Button */}
-                    <button
-                      onClick={() =>
-                        setConfirmAction({
-                          type: selectedPost.isArchived ? 'unarchive' : 'archive',
-                          post: selectedPost,
-                        })
-                      }
-                      title={selectedPost.isArchived ? 'Unarchive Project' : 'Archive Project'}
-                      className="px-3 py-2 rounded-full border border-gray-200 dark:border-white/10 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-bold text-slate-700 dark:text-gray-200 flex items-center gap-1.5 transition-colors"
-                    >
-                      {selectedPost.isArchived ? (
+                    {/* Archive & Delete Controls (Only available to the developer who created the post) */}
+                    {user &&
+                      ((selectedPost.authorId && selectedPost.authorId === user.id) ||
+                        (selectedPost.authorEmail && selectedPost.authorEmail.toLowerCase() === user.email?.toLowerCase()) ||
+                        (selectedPost.author?.username && selectedPost.author.username.toLowerCase() === user.username?.toLowerCase())) && (
                         <>
-                          <ArchiveRestore className="w-3.5 h-3.5 text-emerald-500" />
-                          <span className="hidden sm:inline">Unarchive</span>
-                        </>
-                      ) : (
-                        <>
-                          <Archive className="w-3.5 h-3.5 text-amber-500" />
-                          <span className="hidden sm:inline">Archive</span>
+                          {/* Archive / Unarchive Button */}
+                          <button
+                            onClick={() =>
+                              setConfirmAction({
+                                type: selectedPost.isArchived ? 'unarchive' : 'archive',
+                                post: selectedPost,
+                              })
+                            }
+                            title={selectedPost.isArchived ? 'Unarchive Project' : 'Archive Project'}
+                            className="px-3 py-2 rounded-full border border-gray-200 dark:border-white/10 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-bold text-slate-700 dark:text-gray-200 flex items-center gap-1.5 transition-colors"
+                          >
+                            {selectedPost.isArchived ? (
+                              <>
+                                <ArchiveRestore className="w-3.5 h-3.5 text-emerald-500" />
+                                <span className="hidden sm:inline">Unarchive</span>
+                              </>
+                            ) : (
+                              <>
+                                <Archive className="w-3.5 h-3.5 text-amber-500" />
+                                <span className="hidden sm:inline">Archive</span>
+                              </>
+                            )}
+                          </button>
+
+                          {/* Delete Permanently Button */}
+                          <button
+                            onClick={() => setConfirmAction({ type: 'delete', post: selectedPost })}
+                            title="Delete Project Permanently"
+                            className="px-3 py-2 rounded-full border border-rose-200 dark:border-rose-500/30 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Delete</span>
+                          </button>
                         </>
                       )}
-                    </button>
-
-                    {/* Delete Permanently Button */}
-                    <button
-                      onClick={() => setConfirmAction({ type: 'delete', post: selectedPost })}
-                      title="Delete Project Permanently"
-                      className="px-3 py-2 rounded-full border border-rose-200 dark:border-rose-500/30 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Delete</span>
-                    </button>
                   </div>
                 )}
 

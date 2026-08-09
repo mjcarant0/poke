@@ -19,6 +19,33 @@ export async function PATCH(
       );
     }
 
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE "ProjectPost" ADD COLUMN IF NOT EXISTS "isArchived" BOOLEAN NOT NULL DEFAULT false;`);
+    } catch (e) {
+      // Ignore column creation error
+    }
+
+    const currentUser = await getAuthenticatedUser(req);
+    const existingPost = await prisma.projectPost.findUnique({
+      where: { id: postId },
+    });
+
+    if (!existingPost) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+    }
+
+    if (
+      currentUser &&
+      existingPost.authorId &&
+      existingPost.authorId !== currentUser.userId &&
+      existingPost.authorEmail?.toLowerCase() !== currentUser.email?.toLowerCase()
+    ) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Only the project owner can archive this post' },
+        { status: 403 }
+      );
+    }
+
     const updatedPost = await prisma.projectPost.update({
       where: { id: postId },
       data: { isArchived: body.isArchived } as any,
@@ -39,6 +66,27 @@ export async function DELETE(
 ) {
   try {
     const postId = params.id;
+    const currentUser = await getAuthenticatedUser(req);
+
+    const existingPost = await prisma.projectPost.findUnique({
+      where: { id: postId },
+    });
+
+    if (!existingPost) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+    }
+
+    if (
+      currentUser &&
+      existingPost.authorId &&
+      existingPost.authorId !== currentUser.userId &&
+      existingPost.authorEmail?.toLowerCase() !== currentUser.email?.toLowerCase()
+    ) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Only the project owner can delete this post' },
+        { status: 403 }
+      );
+    }
 
     await prisma.projectPost.delete({
       where: { id: postId },

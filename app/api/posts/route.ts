@@ -6,6 +6,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE "ProjectPost" ADD COLUMN IF NOT EXISTS "isArchived" BOOLEAN NOT NULL DEFAULT false;`);
+    } catch (e) {
+      // Ignore schema column check error
+    }
+
     const session = await getAuthenticatedUser(req);
     const userUpvotedPostIds = new Set<string>();
 
@@ -76,6 +82,12 @@ export async function POST(req: NextRequest) {
     }
 
     const imagesJson = Array.isArray(images) && images.length > 0 ? JSON.stringify(images) : null;
+
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE "ProjectPost" ADD COLUMN IF NOT EXISTS "isArchived" BOOLEAN NOT NULL DEFAULT false;`);
+    } catch (e) {
+      // Ignore column creation error
+    }
 
     const newPost = await prisma.projectPost.create({
       data: {
