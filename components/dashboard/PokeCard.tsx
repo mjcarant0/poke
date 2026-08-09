@@ -124,7 +124,7 @@ export function PokeCard({ poke, onSelect, onStatusChange, onUpvote }: PokeCardP
             >
               <option value="NEW" className="bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400">NOT VIEWED</option>
               <option value="REVIEWING" className="bg-white dark:bg-gray-900 text-purple-600 dark:text-purple-400">REVIEWING</option>
-              <option value="IN_PROGRESS" className="bg-white dark:bg-gray-900 text-amber-600 dark:text-amber-400">IN_PROGRESS</option>
+              <option value="IN_PROGRESS" className="bg-white dark:bg-gray-900 text-amber-600 dark:text-amber-400">IN PROGRESS</option>
               <option value="FIXED" className="bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400">FIXED</option>
               <option value="CLOSED" className="bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">CLOSED</option>
             </select>
