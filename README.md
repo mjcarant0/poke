@@ -22,7 +22,7 @@ Key capabilities:
 
 ## Demo Video
 
-<video src="https://github.com/mjcarant0/poke/blob/main/demo/2026-08-09-21-46-35-1.mp4" controls width="100%"></video>
+🎥 **[Watch the POKE Demo Video on LinkedIn](https://www.linkedin.com/posts/marjoycaranto_thezeropschallenge-zerops-wemakedevs-ugcPost-7492236751172902912-GH51/?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAE5j4E4BC-w8vQAsjyURPIZfbMoDn9JEzUM)**
 
 ---
 
