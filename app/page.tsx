@@ -7,13 +7,15 @@ import { Footer } from '@/components/navigation/Footer';
 import { PostCard } from '@/components/feed/PostCard';
 import { SubmitProjectModal } from '@/components/developer/SubmitProjectModal';
 import { ProjectPost } from '@/types';
-import { ArrowRight, MessageSquareText, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, MessageSquareText, SlidersHorizontal, RefreshCw } from 'lucide-react';
 
 export default function HomePage() {
   const [posts, setPosts] = useState<ProjectPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const loadPosts = async () => {
+    setLoading(true);
     try {
       const res = await fetch('/api/posts');
       if (res.ok) {
@@ -22,6 +24,8 @@ export default function HomePage() {
       }
     } catch (err) {
       setPosts([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,7 +103,12 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {posts.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-16 text-gray-400 gap-2">
+            <RefreshCw className="w-5 h-5 animate-spin text-slate-900 dark:text-white" />
+            <span className="text-xs font-semibold">Loading feed...</span>
+          </div>
+        ) : posts.length === 0 ? (
           <div className="poke-card p-8 sm:p-12 text-center flex flex-col items-center justify-center dark:bg-[#0d1117] rounded-3xl">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">No Projects Submitted Yet</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Be the first developer to submit a project for community review.</p>
