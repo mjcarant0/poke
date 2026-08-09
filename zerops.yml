@@ -25,4 +25,6 @@ zerops:
       ports:
         - port: 3000
           httpSupport: true
+      envVariables:
+        DATABASE_URL: postgresql://${db_user}:${db_password}@${db_hostname}:${db_port}/db?schema=public
       start: npm start
