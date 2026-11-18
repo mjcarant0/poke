@@ -57,8 +57,3 @@ Deployment process:
    - Synchronizes database schema automatically on container startup (`npx prisma db push`).
    - Serves HTTP web traffic on port 3000 (`npm start`).
 
----
-
-## Author & AI Disclosure
-
-The product idea, application concept, features, and UI/UX design were created entirely by the author. AI development tools (including Antigravity AI / Gemini 3.6 Flash) were used for assistance during development for code editing, refactoring, and documentation drafting. All application code, UI/UX design, database structures, and deployment configurations were built, directed, and reviewed by the author.
